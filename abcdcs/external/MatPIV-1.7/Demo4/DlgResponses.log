@@ -1,0 +1,276 @@
+#####
+# Dialog responses for Analyse_PTVTrack
+# Build date: 17. juni 2010
+# Thu Jan  6 19:31:30 2011
+dlgAnalyse_PTVTrack.Predict.UseFormula := false;
+dlgAnalyse_PTVTrack.Predict.UseVelocityFile := false;
+dlgAnalyse_PTVTrack.Predict.ResetInterval :=            0;
+dlgAnalyse_PTVTrack.Predict.GridMemory := 0.750000    ;
+dlgAnalyse_PTVTrack.Predict.WeightGrid :=  1.00000    ;
+dlgAnalyse_PTVTrack.Predict.WeightAcceleration := 0.500000    ;
+dlgAnalyse_PTVTrack.Predict.WeightVelocity :=  1.00000    ;
+dlgAnalyse_PTVTrack.Cost.Sleeping.Limit :=            2;
+dlgAnalyse_PTVTrack.Cost.Sleeping.Premium := 0.500000    ;
+dlgAnalyse_PTVTrack.Cost.SmallFaint.Premium := 0.500000    ;
+dlgAnalyse_PTVTrack.Cost.SmallFaint.AllowSecondMatch := true;
+dlgAnalyse_PTVTrack.Cost.SmallFaint.AllowFirstMatch := false;
+dlgAnalyse_PTVTrack.Cost.JoiningFee := 0.500000    ;
+dlgAnalyse_PTVTrack.Cost.GridVelocity.Threshold :=  2.00000    ;
+dlgAnalyse_PTVTrack.Cost.GridVelocity.LaterMatch := 0.200000    ;
+dlgAnalyse_PTVTrack.Cost.GridVelocity.FirstMatch :=  0.00000E+00;
+dlgAnalyse_PTVTrack.Cost.AreaChange.Threshold :=  2.00000    ;
+dlgAnalyse_PTVTrack.Cost.AreaChange.LaterMatch :=  5.00000E-02;
+dlgAnalyse_PTVTrack.Cost.AreaChange.FirstMatch := 0.200000    ;
+dlgAnalyse_PTVTrack.Cost.ThresholdChange.Threshold := 0.100000    ;
+dlgAnalyse_PTVTrack.Cost.ThresholdChange.LaterMatch := 0.100000    ;
+dlgAnalyse_PTVTrack.Cost.ThresholdChange.FirstMatch :=  4.00000    ;
+dlgAnalyse_PTVTrack.Cost.MatchDistance.LaterMatch :=  2.00000    ;
+dlgAnalyse_PTVTrack.Cost.MatchDistance.SecondMatch :=  4.00000    ;
+dlgAnalyse_PTVTrack.Cost.MatchDistance.FirstMatch :=  8.00000    ;
+dlgAnalyse_PTVTrack.Location.BackgroundIllumination.Kind := "None";
+dlgAnalyse_PTVTrack.Location.Preprocess := "min-max then filter";
+dlgAnalyse_PTVTrack.Location.MaxEdgeAreaRatio :=  30.0000    ;
+dlgAnalyse_PTVTrack.Location.MaxCorrelation := 0.950000    ;
+dlgAnalyse_PTVTrack.Location.MaxMismatch :=  1.00000    ;
+dlgAnalyse_PTVTrack.Location.MinExcess :=  5.00000E-02;
+dlgAnalyse_PTVTrack.Location.minFaintSize :=            2;
+dlgAnalyse_PTVTrack.Location.AcceptSmallerIfFaint := true;
+dlgAnalyse_PTVTrack.Location.MaxYSize :=           10;
+dlgAnalyse_PTVTrack.Location.MinYSize :=            3;
+dlgAnalyse_PTVTrack.Location.MaxXSize :=           10;
+dlgAnalyse_PTVTrack.Location.MinXSize :=            3;
+dlgAnalyse_PTVTrack.Location.MaxArea :=          100;
+dlgAnalyse_PTVTrack.Location.MinArea :=            3;
+dlgAnalyse_PTVTrack.Location.QuadraticSequence := true;
+dlgAnalyse_PTVTrack.Location.Greater := true;
+dlgAnalyse_PTVTrack.Location.nThreshFaint :=            2;
+dlgAnalyse_PTVTrack.Location.nThresh :=           16;
+dlgAnalyse_PTVTrack.Location.ThreshMin :=  5.00000E-02;
+dlgAnalyse_PTVTrack.Location.ThreshMax := 0.250000    ;
+dlgAnalyse_PTVTrack.Particles_Options.DeleteExisting := true;
+dlgAnalyse_PTVTrack.Particles_Options.Colour := "(default)";
+dlgAnalyse_PTVTrack.Particles_Options.Display := true;
+dlgAnalyse_PTVTrack.Particles := "test.dft";
+dlgAnalyse_PTVTrack.VectorScale :=  10.0000    ;
+dlgAnalyse_PTVTrack.ShowLaterMatch := true;
+dlgAnalyse_PTVTrack.ShowSecondMatch := true;
+dlgAnalyse_PTVTrack.ShowFirstMatch := true;
+dlgAnalyse_PTVTrack.ShowSleeping := true;
+dlgAnalyse_PTVTrack.ShowMatchedPredictions := false;
+dlgAnalyse_PTVTrack.ShowGridVelocity := false;
+dlgAnalyse_PTVTrack.ShowUnmatchedNew := false;
+dlgAnalyse_PTVTrack.ShowUnmatchedOld := true;
+dlgAnalyse_PTVTrack.Backdrop := "Streaks";
+dlgAnalyse_PTVTrack.Experiment_Region.Kind := "Conform";
+dlgAnalyse_PTVTrack.Experiment_Time.TimeStepFile :=  1.00000    ;
+dlgAnalyse_PTVTrack.Experiment_Options.Display := true;
+dlgAnalyse_PTVTrack.Experiment := "im0500.gif";
+dlgAnalyse_PTVTrack.DisplayOnExit := true;
+dlgAnalyse_PTVTrack.process := "Analyse_PTVTrack";
+
+ret := process Analyse_PTVTrack(dlgAnalyse_PTVTrack);
+#####
+# Dialog responses for Analyse_PTVTrack
+# Build date: 17. juni 2010
+# Thu Jan  6 19:33:00 2011
+dlgAnalyse_PTVTrack.Predict.UseFormula := false;
+dlgAnalyse_PTVTrack.Predict.UseVelocityFile := false;
+dlgAnalyse_PTVTrack.Predict.ResetInterval :=            0;
+dlgAnalyse_PTVTrack.Predict.GridMemory := 0.750000    ;
+dlgAnalyse_PTVTrack.Predict.WeightGrid :=  1.00000    ;
+dlgAnalyse_PTVTrack.Predict.WeightAcceleration := 0.500000    ;
+dlgAnalyse_PTVTrack.Predict.WeightVelocity :=  1.00000    ;
+dlgAnalyse_PTVTrack.Cost.Sleeping.Limit :=            2;
+dlgAnalyse_PTVTrack.Cost.Sleeping.Premium := 0.500000    ;
+dlgAnalyse_PTVTrack.Cost.SmallFaint.Premium := 0.500000    ;
+dlgAnalyse_PTVTrack.Cost.SmallFaint.AllowSecondMatch := true;
+dlgAnalyse_PTVTrack.Cost.SmallFaint.AllowFirstMatch := false;
+dlgAnalyse_PTVTrack.Cost.JoiningFee := 0.500000    ;
+dlgAnalyse_PTVTrack.Cost.GridVelocity.Threshold :=  2.00000    ;
+dlgAnalyse_PTVTrack.Cost.GridVelocity.LaterMatch := 0.200000    ;
+dlgAnalyse_PTVTrack.Cost.GridVelocity.FirstMatch :=  0.00000E+00;
+dlgAnalyse_PTVTrack.Cost.AreaChange.Threshold :=  2.00000    ;
+dlgAnalyse_PTVTrack.Cost.AreaChange.LaterMatch :=  5.00000E-02;
+dlgAnalyse_PTVTrack.Cost.AreaChange.FirstMatch := 0.200000    ;
+dlgAnalyse_PTVTrack.Cost.ThresholdChange.Threshold := 0.100000    ;
+dlgAnalyse_PTVTrack.Cost.ThresholdChange.LaterMatch := 0.100000    ;
+dlgAnalyse_PTVTrack.Cost.ThresholdChange.FirstMatch :=  4.00000    ;
+dlgAnalyse_PTVTrack.Cost.MatchDistance.LaterMatch :=  2.00000    ;
+dlgAnalyse_PTVTrack.Cost.MatchDistance.SecondMatch :=  4.00000    ;
+dlgAnalyse_PTVTrack.Cost.MatchDistance.FirstMatch :=  8.00000    ;
+dlgAnalyse_PTVTrack.Location.BackgroundIllumination.Kind := "None";
+dlgAnalyse_PTVTrack.Location.Preprocess := "min-max then filter";
+dlgAnalyse_PTVTrack.Location.MaxEdgeAreaRatio :=  30.0000    ;
+dlgAnalyse_PTVTrack.Location.MaxCorrelation := 0.950000    ;
+dlgAnalyse_PTVTrack.Location.MaxMismatch :=  1.00000    ;
+dlgAnalyse_PTVTrack.Location.MinExcess :=  5.00000E-02;
+dlgAnalyse_PTVTrack.Location.minFaintSize :=            2;
+dlgAnalyse_PTVTrack.Location.AcceptSmallerIfFaint := true;
+dlgAnalyse_PTVTrack.Location.MaxYSize :=           10;
+dlgAnalyse_PTVTrack.Location.MinYSize :=            3;
+dlgAnalyse_PTVTrack.Location.MaxXSize :=           10;
+dlgAnalyse_PTVTrack.Location.MinXSize :=            3;
+dlgAnalyse_PTVTrack.Location.MaxArea :=          100;
+dlgAnalyse_PTVTrack.Location.MinArea :=            3;
+dlgAnalyse_PTVTrack.Location.QuadraticSequence := true;
+dlgAnalyse_PTVTrack.Location.Greater := true;
+dlgAnalyse_PTVTrack.Location.nThreshFaint :=            2;
+dlgAnalyse_PTVTrack.Location.nThresh :=           16;
+dlgAnalyse_PTVTrack.Location.ThreshMin :=  5.00000E-02;
+dlgAnalyse_PTVTrack.Location.ThreshMax := 0.250000    ;
+dlgAnalyse_PTVTrack.Particles_Options.Colour := "(default)";
+dlgAnalyse_PTVTrack.Particles_Options.Display := true;
+dlgAnalyse_PTVTrack.Particles := "test####.dft";
+dlgAnalyse_PTVTrack.VectorScale :=  10.0000    ;
+dlgAnalyse_PTVTrack.ShowLaterMatch := true;
+dlgAnalyse_PTVTrack.ShowSecondMatch := true;
+dlgAnalyse_PTVTrack.ShowFirstMatch := true;
+dlgAnalyse_PTVTrack.ShowSleeping := true;
+dlgAnalyse_PTVTrack.ShowMatchedPredictions := false;
+dlgAnalyse_PTVTrack.ShowGridVelocity := false;
+dlgAnalyse_PTVTrack.ShowUnmatchedNew := false;
+dlgAnalyse_PTVTrack.ShowUnmatchedOld := true;
+dlgAnalyse_PTVTrack.Backdrop := "Streaks";
+dlgAnalyse_PTVTrack.Experiment_Region.Kind := "Conform";
+dlgAnalyse_PTVTrack.Experiment_Time.TimeStepFile :=  1.00000    ;
+dlgAnalyse_PTVTrack.Experiment_Options.Display := true;
+dlgAnalyse_PTVTrack.Experiment := "im####.gif";
+dlgAnalyse_PTVTrack.DisplayOnExit := true;
+dlgAnalyse_PTVTrack.process := "Analyse_PTVTrack";
+
+ret := process Analyse_PTVTrack(dlgAnalyse_PTVTrack);
+#####
+# Dialog responses for Analyse_PTVTrack
+# Build date: 17. juni 2010
+# Thu Jan  6 19:36:14 2011
+dlgAnalyse_PTVTrack.Predict.UseFormula := false;
+dlgAnalyse_PTVTrack.Predict.UseVelocityFile := false;
+dlgAnalyse_PTVTrack.Predict.ResetInterval :=            0;
+dlgAnalyse_PTVTrack.Predict.GridMemory := 0.750000    ;
+dlgAnalyse_PTVTrack.Predict.WeightGrid :=  1.00000    ;
+dlgAnalyse_PTVTrack.Predict.WeightAcceleration := 0.500000    ;
+dlgAnalyse_PTVTrack.Predict.WeightVelocity :=  1.00000    ;
+dlgAnalyse_PTVTrack.Cost.Sleeping.Limit :=            2;
+dlgAnalyse_PTVTrack.Cost.Sleeping.Premium := 0.500000    ;
+dlgAnalyse_PTVTrack.Cost.SmallFaint.Premium := 0.500000    ;
+dlgAnalyse_PTVTrack.Cost.SmallFaint.AllowSecondMatch := true;
+dlgAnalyse_PTVTrack.Cost.SmallFaint.AllowFirstMatch := false;
+dlgAnalyse_PTVTrack.Cost.JoiningFee := 0.500000    ;
+dlgAnalyse_PTVTrack.Cost.GridVelocity.Threshold :=  2.00000    ;
+dlgAnalyse_PTVTrack.Cost.GridVelocity.LaterMatch := 0.200000    ;
+dlgAnalyse_PTVTrack.Cost.GridVelocity.FirstMatch :=  0.00000E+00;
+dlgAnalyse_PTVTrack.Cost.AreaChange.Threshold :=  2.00000    ;
+dlgAnalyse_PTVTrack.Cost.AreaChange.LaterMatch :=  5.00000E-02;
+dlgAnalyse_PTVTrack.Cost.AreaChange.FirstMatch := 0.200000    ;
+dlgAnalyse_PTVTrack.Cost.ThresholdChange.Threshold := 0.100000    ;
+dlgAnalyse_PTVTrack.Cost.ThresholdChange.LaterMatch := 0.100000    ;
+dlgAnalyse_PTVTrack.Cost.ThresholdChange.FirstMatch :=  4.00000    ;
+dlgAnalyse_PTVTrack.Cost.MatchDistance.LaterMatch :=  2.00000    ;
+dlgAnalyse_PTVTrack.Cost.MatchDistance.SecondMatch :=  4.00000    ;
+dlgAnalyse_PTVTrack.Cost.MatchDistance.FirstMatch :=  8.00000    ;
+dlgAnalyse_PTVTrack.Location.BackgroundIllumination.Kind := "None";
+dlgAnalyse_PTVTrack.Location.Preprocess := "min-max then filter";
+dlgAnalyse_PTVTrack.Location.MaxEdgeAreaRatio :=  30.0000    ;
+dlgAnalyse_PTVTrack.Location.MaxCorrelation := 0.950000    ;
+dlgAnalyse_PTVTrack.Location.MaxMismatch :=  1.00000    ;
+dlgAnalyse_PTVTrack.Location.MinExcess :=  5.00000E-02;
+dlgAnalyse_PTVTrack.Location.minFaintSize :=            2;
+dlgAnalyse_PTVTrack.Location.AcceptSmallerIfFaint := true;
+dlgAnalyse_PTVTrack.Location.MaxYSize :=           10;
+dlgAnalyse_PTVTrack.Location.MinYSize :=            2;
+dlgAnalyse_PTVTrack.Location.MaxXSize :=           10;
+dlgAnalyse_PTVTrack.Location.MinXSize :=            2;
+dlgAnalyse_PTVTrack.Location.MaxArea :=          100;
+dlgAnalyse_PTVTrack.Location.MinArea :=            3;
+dlgAnalyse_PTVTrack.Location.QuadraticSequence := true;
+dlgAnalyse_PTVTrack.Location.Greater := true;
+dlgAnalyse_PTVTrack.Location.nThreshFaint :=            2;
+dlgAnalyse_PTVTrack.Location.nThresh :=            8;
+dlgAnalyse_PTVTrack.Location.ThreshMin := 0.100000    ;
+dlgAnalyse_PTVTrack.Location.ThreshMax := 0.250000    ;
+dlgAnalyse_PTVTrack.Particles_Options.DeleteExisting := true;
+dlgAnalyse_PTVTrack.Particles_Options.Colour := "(default)";
+dlgAnalyse_PTVTrack.Particles_Options.Display := true;
+dlgAnalyse_PTVTrack.Particles := "test####.dft";
+dlgAnalyse_PTVTrack.VectorScale :=  10.0000    ;
+dlgAnalyse_PTVTrack.ShowLaterMatch := true;
+dlgAnalyse_PTVTrack.ShowSecondMatch := true;
+dlgAnalyse_PTVTrack.ShowFirstMatch := true;
+dlgAnalyse_PTVTrack.ShowSleeping := true;
+dlgAnalyse_PTVTrack.ShowMatchedPredictions := false;
+dlgAnalyse_PTVTrack.ShowGridVelocity := false;
+dlgAnalyse_PTVTrack.ShowUnmatchedNew := false;
+dlgAnalyse_PTVTrack.ShowUnmatchedOld := true;
+dlgAnalyse_PTVTrack.Backdrop := "Streaks";
+dlgAnalyse_PTVTrack.Experiment_Region.Kind := "Conform";
+dlgAnalyse_PTVTrack.Experiment_Time.TimeStepFile :=  1.00000    ;
+dlgAnalyse_PTVTrack.Experiment_Options.Display := true;
+dlgAnalyse_PTVTrack.Experiment := "im####.gif";
+dlgAnalyse_PTVTrack.DisplayOnExit := true;
+dlgAnalyse_PTVTrack.process := "Analyse_PTVTrack";
+
+ret := process Analyse_PTVTrack(dlgAnalyse_PTVTrack);
+#####
+# Dialog responses for Analyse_PTVVectors
+# Build date: 17. juni 2010
+# Thu Jan  6 19:37:02 2011
+dlgAnalyse_PTVVectors.SuperimposeAll := true;
+dlgAnalyse_PTVVectors.DrawAxes := false;
+dlgAnalyse_PTVVectors.VectorScale :=  10.0000    ;
+dlgAnalyse_PTVVectors.DisplayAs := "vector";
+dlgAnalyse_PTVVectors.LenPath :=            4;
+dlgAnalyse_PTVVectors.Output_Options.Display := true;
+dlgAnalyse_PTVVectors.Output := "test.dfd";
+dlgAnalyse_PTVVectors.CoordSystem := "(default)";
+dlgAnalyse_PTVVectors.Input_Region.Kind := "Conform";
+dlgAnalyse_PTVVectors.Input_Time.TimeStepFile :=  1.00000    ;
+dlgAnalyse_PTVVectors.Input_Options.Display := true;
+dlgAnalyse_PTVVectors.Input := "test####.dft";
+dlgAnalyse_PTVVectors.DisplayOnExit := true;
+dlgAnalyse_PTVVectors.process := "Analyse_PTVVectors";
+
+ret := process Analyse_PTVVectors(dlgAnalyse_PTVVectors);
+#####
+# Dialog responses for Analyse_PTVBasicStatistics
+# Build date: 17. juni 2010
+# Thu Jan  6 19:37:44 2011
+dlgAnalyse_PTVBasicStatistics.VelMethod := "quadratic";
+dlgAnalyse_PTVBasicStatistics.VelPath :=            4;
+dlgAnalyse_PTVBasicStatistics.Output_Options.DeleteExisting := true;
+dlgAnalyse_PTVBasicStatistics.Output_Options.Display := true;
+dlgAnalyse_PTVBasicStatistics.Output := "test.dfd";
+dlgAnalyse_PTVBasicStatistics.CoordSystem := "(default)";
+dlgAnalyse_PTVBasicStatistics.Input_Region.Kind := "Conform";
+dlgAnalyse_PTVBasicStatistics.Input_Time.TimeStepFile :=  1.00000    ;
+dlgAnalyse_PTVBasicStatistics.Input_Options.Display := true;
+dlgAnalyse_PTVBasicStatistics.Input := "test####.dft";
+dlgAnalyse_PTVBasicStatistics.DisplayOnExit := true;
+dlgAnalyse_PTVBasicStatistics.process := "Analyse_PTVBasicStatistics";
+
+ret := process Analyse_PTVBasicStatistics(dlgAnalyse_PTVBasicStatistics);
+#####
+# Dialog responses for Analyse_PTVGridVelocity
+# Build date: 17. juni 2010
+# Thu Jan  6 19:38:43 2011
+dlgAnalyse_PTVGridVelocity.BackScale :=  1.00000    ;
+dlgAnalyse_PTVGridVelocity.Background := "";
+dlgAnalyse_PTVGridVelocity.DrawAxes := false;
+dlgAnalyse_PTVGridVelocity.VelocityScale :=  1.00000    ;
+dlgAnalyse_PTVGridVelocity.VelMethod := "linear";
+dlgAnalyse_PTVGridVelocity.FilterLength :=  10.0000    ;
+dlgAnalyse_PTVGridVelocity.nyGrid :=           32;
+dlgAnalyse_PTVGridVelocity.nxGrid :=           32;
+dlgAnalyse_PTVGridVelocity.AverageOver :=            0;
+dlgAnalyse_PTVGridVelocity.GridType := "instantaneous";
+dlgAnalyse_PTVGridVelocity.VelPath :=            4;
+dlgAnalyse_PTVGridVelocity.Output_Options.Display := true;
+dlgAnalyse_PTVGridVelocity.Output := "test.dfd";
+dlgAnalyse_PTVGridVelocity.CoordSystem := "";
+dlgAnalyse_PTVGridVelocity.Input_Region.Kind := "Conform";
+dlgAnalyse_PTVGridVelocity.Input_Time.TimeStepFile :=  1.00000    ;
+dlgAnalyse_PTVGridVelocity.Input_Options.Display := true;
+dlgAnalyse_PTVGridVelocity.Input := "test####.dft";
+dlgAnalyse_PTVGridVelocity.DisplayOnExit := true;
+dlgAnalyse_PTVGridVelocity.process := "Analyse_PTVGridVelocity";
+
+ret := process Analyse_PTVGridVelocity(dlgAnalyse_PTVGridVelocity);
