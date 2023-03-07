@@ -1,0 +1,40 @@
+name: abcd
+channels:
+  - conda-forge
+dependencies:
+  - python >=3.9, <3.10
+  - ipython
+  - ipykernel
+  - pytest
+
+# scientific python stack
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - ipympl=0.7.0
+  - seaborn
+  - xarray
+  - dask
+  - scikit-learn
+  - statsmodels
+
+# additional plotting
+
+# image processing
+  - napari[all]
+  - imageio
+  - scikit-image
+
+# workflow
+  - typer
+  - bioconda::snakemake
+
+# pip installed
+  - pip
+  - pip:
+    - aicsimageio
+    - aicsimageio[nd2]
+    - aicsimageio[base-imageio]
+    - bioformats-jar
+    - session-info
