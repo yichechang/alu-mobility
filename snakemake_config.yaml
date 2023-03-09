@@ -8,6 +8,7 @@ input:
   pepfile: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/project_config.yaml
   subdir: 230307_test_alu_h2b_dual
   ext: nd2
+  samplesheet: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/samplesheet.csv
 
 # use absolute paths for output dir
 output:

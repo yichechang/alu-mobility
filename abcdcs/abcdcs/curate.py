@@ -11,7 +11,10 @@ import pandas as pd
 import numpy as np
 import typer
 
-_REQUIRED_METADATA = {
+_MIN_IMAGE_META = ["ExpID", "Date", "PlateID", "Condition_Plate", "WellID", "FovID"]
+_MIN_SAMPLE_META = ["ExpID", "Date", "PlateID", "Condition_Plate", "WellID"]
+
+_REQUIRED_METADATA_AND_DEFAULTS = {
     "ExpID": 'empty', 
     "Date": '920215',
     "PlateID": 1,
@@ -70,7 +73,7 @@ def parse_filepaths(
         fpaths: List[str],
         pat: str,
         nafilter: str = 'strict',
-        patch: bool = False,
+        # patch: bool = False,
         verbose: bool = True,
     ) -> pd.DataFrame:
     """Parse metadata from filepath for a given regexp pattern.
@@ -94,7 +97,8 @@ def parse_filepaths(
     
     Notes
     -----
-    Date is parsed and of dtype datetime64[ns].
+    Date is parsed and converted to '%Y-%m-%d' but stored as str, so 
+    everything non-numerical stays as str.
 
     Raise
     -----
@@ -130,10 +134,34 @@ def parse_filepaths(
         print(f"{len(fileinfo)} files parsed successfully!")
 
 
-    if patch:
-        for key in _REQUIRED_METADATA.keys():
-            if key not in pat_groups:
-                fileinfo[key] = _REQUIRED_METADATA[key]
-        fileinfo = fileinfo[['ImageFilepath']+[*_REQUIRED_METADATA]]
-
+    if 'Date' in fileinfo.columns:
+        fileinfo['Date'] = pd.to_datetime(fileinfo['Date'], format='%y%m%d').dt.strftime('%Y-%m-%d')
+    
     return fileinfo
+
+
+def read_samplesheet(fpath: str) -> pd.DataFrame:
+    return pd.read_csv(fpath)
+
+
+def merge_sample_metadata(
+        fileinfo: pd.DataFrame, 
+        samplemeta: pd.DataFrame,
+        patch: bool = True,
+    ) -> pd.DataFrame:
+    
+    joinon = list(set(fileinfo.columns) & set(_MIN_IMAGE_META) & set(_MIN_SAMPLE_META))
+    merged = fileinfo.merge(samplemeta, on=joinon)
+
+    if patch:
+        cols_to_patch = set(_MIN_IMAGE_META) - set(_REQUIRED_METADATA_AND_DEFAULTS.keys())
+        for key in cols_to_patch:
+            merged[key] = _REQUIRED_METADATA_AND_DEFAULTS[key]
+    
+    
+    # reorder columns
+    cols_paths = ['ImageFilepath']
+    cols_imagemeta = _MIN_IMAGE_META
+    cols_others = list(set(merged.columns) - set(cols_paths + cols_imagemeta))
+
+    return merged[cols_paths + cols_imagemeta + cols_others]

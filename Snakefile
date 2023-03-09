@@ -11,5 +11,6 @@ rule build_imagelist:
                 "'{config[input][subdir]}' "
                 "{config[input][ext]} "
                 "'{pep.config[metadata][movie][pattern]}' "
+                "'{config[input][samplesheet]}' "
                 "'{output}' "
                 "--nafilter strict --patch --verbose"
