@@ -2,26 +2,29 @@
 Prepare dataset from a list of images and metadata files
 """
 
+from typing import Dict, List, Union
 import pathlib
 import re
-from typing import List, Union
 import warnings
 
 import pandas as pd
-import numpy as np
-import typer
 
-_MIN_IMAGE_META = ["ExpID", "Date", "PlateID", "Condition_Plate", "WellID", "FovID"]
-_MIN_SAMPLE_META = ["ExpID", "Date", "PlateID", "Condition_Plate", "WellID"]
-
-_REQUIRED_METADATA_AND_DEFAULTS = {
-    "ExpID": 'empty', 
-    "Date": '920215',
-    "PlateID": 1,
-    "Condition_Plate": 'empty', 
-    "WellID": 'empty',
-    "FovID": 1
+_MINMETA = {
+    'sample': ["ExpID", "Date", "PlateID", "Condition_Plate", "WellID"],
+    'imageset': ["ExpID", "Date", "PlateID", "Condition_Plate", "WellID", "FovID"],
+    'roi': ["ExpID", "Date", "PlateID", "Condition_Plate", "WellID", "FovID", "RoiID"],
 }
+
+_DEFAULT_MINMETA_IMAGESET = {
+    "ExpID": 'UnknownExp', 
+    "Date": '920215',
+    "PlateID": '1',
+    "Condition_Plate": 'UnknownPlateCondition', 
+    "WellID": 'UnknownWell',
+    "FovID": '1'
+}
+
+
 
 def list_matching_files(
         rootdir: Union[str, pathlib.Path], 
@@ -69,11 +72,11 @@ def list_matching_files(
 
     return fpaths
 
+
 def parse_filepaths(
         fpaths: List[str],
         pat: str,
         nafilter: str = 'strict',
-        # patch: bool = False,
         verbose: bool = True,
     ) -> pd.DataFrame:
     """Parse metadata from filepath for a given regexp pattern.
@@ -106,14 +109,14 @@ def parse_filepaths(
         If nafilter is set to 'strict', and some files cannot be parsed.
     """
     
-    fileinfo = pd.DataFrame({"ImageFilepath": fpaths})
+    fileinfo = pd.DataFrame({"ImagesetFilepath": fpaths})
     
     # Extract metadata with regexp and create corresponding columns.
     # This automatically creates the pattern group names in a list 
     # which is no longer a required argument. This is done by parsing
     # the pattern string itself. 
     pat_groups = re.compile(r"P<(\w+)>").findall(pat)
-    fileinfo[pat_groups] = fileinfo["ImageFilepath"].str.extract(pat)
+    fileinfo[pat_groups] = fileinfo["ImagesetFilepath"].str.extract(pat)
 
     # Filter out non-matching files
     notmatched = len(fileinfo) - len(fileinfo.dropna(axis="rows", how="any"))
@@ -137,11 +140,11 @@ def parse_filepaths(
     if 'Date' in fileinfo.columns:
         fileinfo['Date'] = pd.to_datetime(fileinfo['Date'], format='%y%m%d').dt.strftime('%Y-%m-%d')
     
-    return fileinfo
+    return fileinfo.astype(str)
 
 
 def read_samplesheet(fpath: str) -> pd.DataFrame:
-    return pd.read_csv(fpath)
+    return pd.read_csv(fpath, dtype=str)
 
 
 def merge_sample_metadata(
@@ -149,19 +152,83 @@ def merge_sample_metadata(
         samplemeta: pd.DataFrame,
         patch: bool = True,
     ) -> pd.DataFrame:
-    
-    joinon = list(set(fileinfo.columns) & set(_MIN_IMAGE_META) & set(_MIN_SAMPLE_META))
+
+    joinon = list(set(fileinfo.columns) & set(_MINMETA['imageset']) & set(_MINMETA['sample']))
     merged = fileinfo.merge(samplemeta, on=joinon)
 
     if patch:
-        cols_to_patch = set(_MIN_IMAGE_META) - set(_REQUIRED_METADATA_AND_DEFAULTS.keys())
+        cols_to_patch = set(_MINMETA['imageset']) - set(_DEFAULT_MINMETA_IMAGESET.keys())
         for key in cols_to_patch:
-            merged[key] = _REQUIRED_METADATA_AND_DEFAULTS[key]
+            merged[key] = _DEFAULT_MINMETA_IMAGESET[key]
     
+    # UID is used to uniquely identify files irrespective where
+    # are actually stored, to bypass the hurdle dealing with
+    # the same underlying files have different paths on local
+    # vs cluster.
+    merged['ImagesetUID'] = MetadataConverter('imageset').gather(merged)
     
     # reorder columns
-    cols_paths = ['ImageFilepath']
-    cols_imagemeta = _MIN_IMAGE_META
-    cols_others = list(set(merged.columns) - set(cols_paths + cols_imagemeta))
+    cols_paths = ['ImagesetFilepath']
+    cols_imagesetUID = ['ImagesetUID'] + _MINMETA['imageset']
+    cols_others = list(set(merged.columns) - set(cols_paths + cols_imagesetUID))
 
-    return merged[cols_paths + cols_imagemeta + cols_others]
+    return merged[cols_imagesetUID + cols_paths + cols_others]
+
+class MetadataConverter(object):
+    def __init__(self, obj: str) -> None:
+        if obj not in _MINMETA.keys():
+            raise ValueError(f"{self._obj} metadata schema not supported.")
+        
+        self._obj = obj
+        self._minmeta = _MINMETA[self._obj]
+    
+    def separate(self, 
+                 metadata: Union[str, pd.Series]
+        ) -> Union[Dict[str, str], pd.DataFrame]:
+        """
+        UID to metadata dict or dataframe
+        """
+
+        if isinstance(metadata, str):
+            values = metadata.split('_')
+            return {k: v for (k, v) in zip(self._minmeta, values)}
+        elif isinstance(metadata, pd.Series):
+            df = metadata.str.split('_', expand=True)
+            return df.rename(columns={k: v for (k,v) in zip(df.columns.to_list(), self._minmeta)})
+
+    def gather(self, 
+               metadata: Union[Dict[str, str], pd.DataFrame]
+        ) -> Union[str, pd.Series]:
+        """
+        Dict of dataframe to UID
+        """
+
+        if isinstance(metadata, Dict):
+            try:
+                return '_'.join([metadata[field] for field in self._minmeta])
+            except TypeError:
+                _metadata = self._sanitize(metadata)
+                return '_'.join([_metadata[field].astype(str) for field in self._minmeta])
+        elif isinstance(metadata, pd.DataFrame):
+            try:
+                return metadata[self._minmeta].agg('_'.join, axis=1)
+            except TypeError:
+                _metadata = self._sanitize(metadata)
+                return _metadata[self._minmeta].agg('_'.join, axis=1)
+
+    def _sanitize(self, 
+                  metadata: Union[Dict[str, str], pd.DataFrame]
+        ) -> Union[Dict[str, str], pd.DataFrame]:
+        """
+        Convert non-string values to string.
+        """
+        
+        warnings.warn(
+            "Some non-string metadata values have been converted to "
+            "string, in order to convert metadata format. Original "
+            "metadata is not altered, though."
+        )
+        if isinstance(metadata, Dict):
+            return {k: str(v) for (k,v) in metadata.items()}
+        elif isinstance(metadata, pd.DataFrame):
+            return metadata.astype(str) 
