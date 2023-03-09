@@ -27,6 +27,7 @@ dependencies:
   - scikit-image
 
 # workflow
+  - pyyaml
   - typer
   - bioconda::snakemake
 

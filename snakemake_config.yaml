@@ -1,0 +1,11 @@
+# use absolute paths for input
+# if relative, it's relative to where snakemake is invoked
+input:
+  basedir: "/Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses"
+  pepfile: "/Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/project_config.yaml"
+  subdir: "230307_test_alu_h2b_dual"
+  ext: "nd2"
+
+# use absolute paths for output dir
+output:
+  dir: '/Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/'
