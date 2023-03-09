@@ -1,11 +1,14 @@
-# use absolute paths for input
-# if relative, it's relative to where snakemake is invoked
+# Use absolute paths for input. If relative, it's relative to where 
+# snakemake is invoked.
+# These are all one single string, no need to quote these paths. They 
+# will work correctly when referenced in "run" block. However, in 
+# "shell" block, they must be quoted (even if they were quoted here).
 input:
-  basedir: "/Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses"
-  pepfile: "/Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/project_config.yaml"
-  subdir: "230307_test_alu_h2b_dual"
-  ext: "nd2"
+  basedir: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses
+  pepfile: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/project_config.yaml
+  subdir: 230307_test_alu_h2b_dual
+  ext: nd2
 
 # use absolute paths for output dir
 output:
-  dir: '/Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/'
+  dir: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/

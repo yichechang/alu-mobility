@@ -5,10 +5,11 @@ rule build_imagelist:
     output: 
         config['output']['dir'] + 'output/imagelist.csv',
     shell:
+        # Must quote whatever that will be used as paths
         "python scripts/build_imagelist.py "
                 "'{config[input][basedir]}' "
                 "'{config[input][subdir]}' "
-                "'{config[input][ext]}' "
+                "{config[input][ext]} "
                 "'{pep.config[metadata][movie][pattern]}' "
                 "'{output}' "
                 "--nafilter strict --patch --verbose"
