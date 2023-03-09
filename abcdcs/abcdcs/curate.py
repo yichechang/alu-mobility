@@ -177,7 +177,7 @@ def merge_sample_metadata(
 class MetadataConverter(object):
     def __init__(self, obj: str) -> None:
         if obj not in _MINMETA.keys():
-            raise ValueError(f"{self._obj} metadata schema not supported.")
+            raise ValueError(f"`{obj}` metadata schema not supported.")
         
         self._obj = obj
         self._minmeta = _MINMETA[self._obj]
