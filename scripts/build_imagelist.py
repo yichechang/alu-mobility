@@ -19,7 +19,7 @@ def main(
         ext: str, 
         pat: str, 
         samplesheet: str,
-        outputdir: str,
+        outputpath: str,
         nafilter: Optional[str] = 'strict',
         patch: Optional[bool] = True,
         verbose: Optional[bool] = True,
@@ -48,7 +48,7 @@ def main(
 
     # save merged dataframe as csv with non-numerical values quoted by
     # double-quotes (quoting=2).
-    merged.to_csv(outputdir, quoting=2, index=False, header=True)
+    merged.to_csv(outputpath, quoting=2, index=False, header=True)
 
 if __name__ == '__main__':
     typer.run(main)
