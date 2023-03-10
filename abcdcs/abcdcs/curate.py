@@ -92,11 +92,6 @@ def parse_filepaths(
         'strict' to raise error if some files cannot be parsed; 'loose'
         to warn and remove problematic files; 'keep' will warn but keep
         all files, resulting in the returned dataframe to have some NaN.
-    patch : bool, optional default to False
-        If True, will patch metadata required to uniquely identify a 
-        specific FOV, if they are not available or parsed; including
-        `ExpID`=`NaN`, `Date`=`1992-02-15`, `PlateID`=`1`, 
-        `Condition_Plate`=`NaN`, `WellID`=`NaN`, and `FovID`=`1`.
     
     Notes
     -----
@@ -136,9 +131,18 @@ def parse_filepaths(
     if verbose:
         print(f"{len(fileinfo)} files parsed successfully!")
 
-
+    #
+    # Possible non-string values should be parsed appropriately before
+    # being convereted to string.
+    #
+    # TODO:
+    # - Make a global dict for metadata key and value type
+    #
     if 'Date' in fileinfo.columns:
         fileinfo['Date'] = pd.to_datetime(fileinfo['Date'], format='%y%m%d').dt.strftime('%Y-%m-%d')
+    for field in ['PlateID', 'FovID']:
+        if field in fileinfo.columns:
+            fileinfo[field] = fileinfo[field].astype(int).astype(str)
     
     return fileinfo.astype(str)
 
@@ -156,6 +160,9 @@ def merge_sample_metadata(
     joinon = list(set(fileinfo.columns) & set(_MINMETA['imageset']) & set(_MINMETA['sample']))
     merged = fileinfo.merge(samplemeta, on=joinon)
 
+    #
+    # Required but non-existing metadata to be patched.
+    #
     if patch:
         cols_to_patch = set(_MINMETA['imageset']) - set(_DEFAULT_MINMETA_IMAGESET.keys())
         for key in cols_to_patch:
@@ -208,7 +215,7 @@ class MetadataConverter(object):
                 return '_'.join([metadata[field] for field in self._minmeta])
             except TypeError:
                 _metadata = self._sanitize(metadata)
-                return '_'.join([_metadata[field].astype(str) for field in self._minmeta])
+                return '_'.join([_metadata[field] for field in self._minmeta])
         elif isinstance(metadata, pd.DataFrame):
             try:
                 return metadata[self._minmeta].agg('_'.join, axis=1)
