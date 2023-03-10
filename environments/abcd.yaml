@@ -18,6 +18,7 @@ dependencies:
   - dask
   - scikit-learn
   - statsmodels
+  - scyjava
 
 # additional plotting
 
