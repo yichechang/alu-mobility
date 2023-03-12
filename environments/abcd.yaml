@@ -2,7 +2,7 @@ name: abcd
 channels:
   - conda-forge
 dependencies:
-  - python >=3.9, <3.10
+  - python >=3.8.5, <3.9
   - ipython
   - ipykernel
   - pytest
@@ -39,4 +39,6 @@ dependencies:
     - aicsimageio[nd2]
     - aicsimageio[base-imageio]
     - bioformats-jar
+    - cellpose
     - session-info
+    - -e ../abcdcs

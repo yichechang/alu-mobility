@@ -36,7 +36,7 @@ class Checkpoint_MakePattern:
 
 rule all:
     input:
-        Checkpoint_MakePattern(OUTPUT_DIR + "single_nuc_movie/{RoiUID}.ome.tif")
+        Checkpoint_MakePattern(OUTPUT_DIR + "single_nuc_mask_movie/{RoiUID}.ome.tif")
 
 rule build_imagelist:
     output: 
@@ -82,3 +82,10 @@ checkpoint check_crop_roi:
         touch(OUTPUT_DIR + '.check_crop_roi.done')
 
 
+rule segment_nuclei_in_time:
+    input:
+        OUTPUT_DIR + "single_nuc_movie/{RoiUID}.ome.tif"
+    output:
+        OUTPUT_DIR + "single_nuc_mask_movie/{RoiUID}.ome.tif"
+    shell:
+        "python scripts/segment_nuclei_in_time.py '{input}' '{output}' --ch 1"
