@@ -16,7 +16,7 @@ class Checkpoint_MakePattern:
 
         # wait for the results of 'check_crop_roi'; this will trigger an
         # exception until that rule has been run.
-        checkpoints.check_crop_roi.get(**w)
+        checkpoints.crop_roi.get(**w)
 
         # the magic, such as it is, happens here: we create the
         # information used to expand the pattern, using arbitrary
@@ -63,7 +63,7 @@ rule draw_roi:
 
 
 OUTPUT_DIR_CROP = OUTPUT_DIR + "single_nuc_movie/"
-rule crop_roi:
+checkpoint crop_roi:
     input:
         OUTPUT_DIR + 'roilist.csv'
     output:
@@ -73,13 +73,6 @@ rule crop_roi:
         mkdir -p '{OUTPUT_DIR_CROP}'
         python scripts/crop_roi.py '{input}' '{OUTPUT_DIR_CROP}'
         """
-
-
-checkpoint check_crop_roi:
-    input: 
-        OUTPUT_DIR + ".crop_roi.done"
-    output: 
-        touch(OUTPUT_DIR + '.check_crop_roi.done')
 
 
 rule segment_nuclei_in_time:
