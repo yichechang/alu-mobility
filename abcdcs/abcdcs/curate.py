@@ -17,7 +17,7 @@ _MINMETA = {
 
 _DEFAULT_MINMETA_IMAGESET = {
     "ExpID": 'UnknownExp', 
-    "Date": '920215',
+    "Date": '1947-02-28',
     "PlateID": '1',
     "Condition_Plate": 'UnknownPlateCondition', 
     "WellID": 'UnknownWell',
@@ -76,6 +76,7 @@ def list_matching_files(
 def parse_filepaths(
         fpaths: List[str],
         pat: str,
+        datefmt: str = None,
         nafilter: str = 'strict',
         verbose: bool = True,
     ) -> pd.DataFrame:
@@ -139,7 +140,7 @@ def parse_filepaths(
     # - Make a global dict for metadata key and value type
     #
     if 'Date' in fileinfo.columns:
-        fileinfo['Date'] = pd.to_datetime(fileinfo['Date'], format='%y%m%d').dt.strftime('%Y-%m-%d')
+        fileinfo['Date'] = pd.to_datetime(fileinfo['Date'], format=datefmt).dt.strftime('%Y-%m-%d')
     for field in ['PlateID', 'FovID']:
         if field in fileinfo.columns:
             fileinfo[field] = fileinfo[field].astype(int).astype(str)

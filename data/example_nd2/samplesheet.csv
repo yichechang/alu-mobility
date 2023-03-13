@@ -1,0 +1,5 @@
+"ExpID","Date","PlateID","Condition_Plate","WellID","Condition_Cellline","Condition_sgRNA","Condition_Channel-miRFP670","Condition_Channel-sfGFP"
+"y459","2022-09-15",1,"live","C03","Clonal4D03","sgAlu","HP1A","dCas9"
+"y459","2022-09-15",1,"live","C04","Clonal4D03","sgNT","HP1A","dCas9"
+"y459","2022-09-15",1,"live","D03","Clonal4D03","sgAlu","H2B","dCas9"
+"y459","2022-09-15",1,"live","D04","Clonal4D03","sgNT","H2B","dCas9"

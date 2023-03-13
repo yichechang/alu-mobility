@@ -1,15 +1,38 @@
-# Use absolute paths for input. If relative, it's relative to where 
-# snakemake is invoked.
-# These are all one single string, no need to quote these paths. They 
-# will work correctly when referenced in "run" block. However, in 
-# "shell" block, they must be quoted (even if they were quoted here).
-input:
-  basedir: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses
-  pepfile: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/project_config.yaml
-  subdir: 230307_test_alu_h2b_dual
-  ext: nd2
-  samplesheet: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/samplesheet.csv
+# ======================================================================
+#
+# Experiment-specific configurations
+#
+# ======================================================================
 
-# use absolute paths for output dir
-output:
-  dir: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/
+# No need to quote the strings in yaml files, but do so when special 
+# characters are used. More importantly, even if they are quoted here,
+# they still need to be quoted again when used in the "shell" derivative.
+input:
+  pepfile_path: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/raw_nd2/project_config.yaml
+  experiment_type: movie
+  samplesheet_path: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/raw_nd2/samplesheet.csv
+  raw:
+    base_dir: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses
+    subdir_name: 230307_test_alu_h2b_dual
+    ext: nd2
+
+build_imagelist:
+  nafilter: strict
+  options: >
+    --patch
+    --verbose
+
+segment_nuclei_in_time:
+  channel: sfGFP
+
+piv:
+  channel: miRFP670
+
+# ======================================================================
+#
+# Platform-specific configurations
+#
+# ======================================================================
+software:
+  matlab_path: /Applications/MATLAB_R2019b.app/bin/matlab
+  mfile_dir: /Users/yi-che/repository/phd-analysis/abc-mobility/scripts 

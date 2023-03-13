@@ -1,16 +1,21 @@
 from pathlib import Path
 from functools import partial
+
 import numpy as np
 import pandas as pd
+
 from aicsimageio import AICSImage
 from aicsimageio.readers.bioformats_reader import BioformatsReader
 from aicsimageio.writers import OmeTiffWriter
+
 import typer
+
 
 def main(roilist_path: str, output_dir: str) -> None:
     df = pd.read_csv(roilist_path)
     crop_func = partial(crop_rois_from_a_file, output_dir=output_dir)
     df.groupby('ImagesetUID').apply(crop_func)
+
 
 def crop_rois_from_a_file(df: pd.DataFrame, *, output_dir: str) -> None:
     # open the image (all rois are from the same image)
@@ -29,5 +34,14 @@ def crop_rois_from_a_file(df: pd.DataFrame, *, output_dir: str) -> None:
         outpath = (Path(output_dir) / roi['RoiUID']).with_suffix('.ome.tif')
         OmeTiffWriter.save(cropped.data, str(outpath)) 
 
+
 if __name__ == '__main__':
-    typer.run(main)
+    try:
+        snakemake
+    except NameError:
+        snakemake = None
+    if snakemake is not None:
+        main(snakemake.input[0], 
+             snakemake.params['outdir'])
+    else:
+        typer.run(main)

@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List, Optional
 from pathlib import Path
 import shutil
 
@@ -11,17 +11,24 @@ import pandas as pd
 from abcdcs import curate
 import typer
 
-def roi_drawer(imageset_records: List, output_dir: Path):
+
+# TODO:
+#   Consider picking some defaults for chinfo_dict
+def roi_drawer(imageset_records: List, output_dir: Path, chinfo_dict: Dict = None):
     """View and draw ROIs on each image set from the filepath list.
 
     Parameters
     ----------
-    im_dict: list of dict
-        List of image records. Each record needs to contain minimally
-        `Filepath` (absolute path point to an nd2 file) and 
-        `ImageUUID` (UID associated with that nd2 file).
+    imageset_records: list of dict
+        List of imageset records. Each record needs to contain minimally
+        `ImagesetFilepath` (absolute path point to an nd2 file) and 
+        `ImagesetUID` (UID associated with that nd2 file).
     output_dir: pathlib.Path
         Path to the directry where compiled results (csv) to be saved.
+    chinfo_dict: Dict
+        Dictionary containing channel information, in the format of
+        {key: [val_Ch0, val_Ch1, val_Ch2, ...]}. Keys required include
+        `fluoro` and `colormap`.
 
     Notes
     -----
@@ -35,11 +42,18 @@ def roi_drawer(imageset_records: List, output_dir: Path):
     current_path = 0
     img = AICSImage(imageset_records[current_path]['ImagesetFilepath']).xarray_data
 
+    if chinfo_dict is None:
+        n_channels = img.coords['C'].size
+        chinfo_dict = {
+            'fluoro': ['channel:'+str(idx) for idx in range(n_channels)],
+            'colormap': ['Greys_r' for _ in range(n_channels)]
+        }
+
     viewer = napari.view_image(
         img, 
         channel_axis=1, 
-        colormap=['magenta', 'green'], 
-        name = ['miRFP670', 'GFP'],
+        colormap=chinfo_dict['colormap'], 
+        name=chinfo_dict['fluoro'],
     )
     # Connect these two image layers to autoscale contrast when updated
     # From: https://forum.image.sc/t/function-to-autoadjust-lut-programatically/40396/2
@@ -84,7 +98,7 @@ def roi_drawer(imageset_records: List, output_dir: Path):
     def save_current_rois(viewer):
         outname = curate.MetadataConverter('imageset').gather(imageset_records[current_path]) + '.csv'
         outpath = output_dir / outname
-        
+
         # Not sure how to access the dataframe describing ROI features.
         # But can save them asa csv and they will have the following
         # fields: index, shape-type, vertex-index, axis-0, axis-1.
@@ -103,8 +117,12 @@ def roi_drawer(imageset_records: List, output_dir: Path):
         
         # Update layers for new images without adding/removing layers
         img = AICSImage(imageset_records[current_path]["ImagesetFilepath"]).xarray_data
-        viewer.layers['miRFP670'].data = img.isel(C=0).data
-        viewer.layers['GFP'].data = img.isel(C=1).data
+        # viewer.layers['miRFP670'].data = img.isel(C=0).data
+        # viewer.layers['GFP'].data = img.isel(C=1).data
+        # TODO:
+        #   Do not rely on the order (i.e., don't use index)
+        for idx,fluoro in enumerate(chinfo_dict['fluoro']):
+            viewer.layers[fluoro].data = img.isel(C=idx).data
 
         # Reset ROI layer for the new image
         viewer.layers['ROIs'].data = []
@@ -177,26 +195,61 @@ def compile_roilist(
     #
     df_rois.to_csv(output_path, quoting=2, index=False, header=True)
 
-def main(imagesetlist_path: str, output_path: str) -> None:
+def extract_channel_info(pepfile_path: str, exptype: str) -> Dict:
     """
+    From a pepfile, convert channel info from list of {k: v}'s to {key: list of v's}
+    """
+    import yaml
+    with open(pepfile_path, 'rb') as f:
+        conf = yaml.load(f, Loader=yaml.CLoader)
+    channels = conf['experiments'][exptype]['channels']
+    keys = channels[0].keys()
+    return {
+        key: [ch[key] for ch in channels]
+        for key in keys
+    }
+
+def main(imagesetlist_path: str, output_path: str, chinfo_dict=None
+    ) -> None:
+    # Don't type hint `chinfo_dict` (which should be Dict) because 
+    # typer doesn't support such type. This also means currently we
+    # can't specify channel information when launching via commandline,
+    # and as such all channels will be in grey.
+    # TODO:
+    #   If refactoring roi_drawer(), pick some sensible defaults.
+    """
+    Combined ROI information will be saved as file <output_path>. A tmp
+    directory will be created in the same dir which <output_path> is in,
+    to store individual csv files for each Imageset. 
     """    
     imageset_records = pd.read_csv(imagesetlist_path, dtype=str).to_dict('records')
     
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_pathobj = Path(output_path)
+    output_pathobj.parent.mkdir(parents=True, exist_ok=True)
 
     # Create a new tmp dir for this specific drawing action. Note that
     # old 'tmp/roi_drawer/' will be removed first.
-    tmp_dir = output_path.parent / "tmp" / "roi_drawer"
+    tmp_dir = output_pathobj.parent / "tmp" / "roi_drawer"
     if tmp_dir.exists() and tmp_dir.is_dir():
         shutil.rmtree(tmp_dir)
     tmp_dir.mkdir(exist_ok=True, parents=True)
-    
-    roi_drawer(imageset_records, tmp_dir)
+    roi_drawer(imageset_records, tmp_dir, chinfo_dict)
     
     compile_roilist(tmp_dir, output_path, imagesetlist_path)
 
 
 if __name__ == '__main__':
-    typer.run(main)
+    try:
+        snakemake
+    except NameError:
+        snakemake = None
+    if snakemake is not None:
+        chinfo_dict = extract_channel_info(
+            snakemake.config['input']['pepfile_path'], 
+            snakemake.config['input']['experiment_type'])
+        main(snakemake.input[0], 
+             snakemake.output[0], 
+             chinfo_dict=chinfo_dict)
+    else:
+        typer.run(main)
 

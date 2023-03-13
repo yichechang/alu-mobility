@@ -1,9 +1,14 @@
 import pandas as pd
 
-configfile: 'snakemake_config.yaml'
-pepfile: config['input']['pepfile']
+# this is set relative to where Snakefile is *stored* (but *not called*)
+# thus there're two ways for configuring this workflow
+#   1. modify the config file in-place, OR
+#   2. duplicate the config file to the analysis directory, and then
+#      specify its location as option when launching snakemake via 
+#      commandline
+configfile: workflow.source_path('snakemake_config.yaml')
 
-OUTPUT_DIR = config['output']['dir'] 
+pepfile: config['input']['pepfile_path']
 
 # Code from reference:
 # http://ivory.idyll.org/blog/2021-snakemake-checkpoints.html
@@ -31,54 +36,114 @@ class Checkpoint_MakePattern:
         return pattern_expanded
 
     def get_names(self):
-        return pd.read_csv(OUTPUT_DIR+'roilist.csv')['RoiUID'].to_list()
+        return pd.read_csv('roilist.csv')['RoiUID'].to_list()
+
+def get_channel_names():
+    channels = (pep.config['experiments']
+                          [config['input']['experiment_type']]
+                          ['channels'])
+    return [c['fluoro'] for c in channels]
+
+ALL_CH = get_channel_names()
 
 
 rule all:
     input:
-        Checkpoint_MakePattern(OUTPUT_DIR + "single_nuc_mask_movie/{RoiUID}.ome.tif")
+        Checkpoint_MakePattern(
+            expand("piv/{ch}/{RoiUID}.mat", ch=ALL_CH, allow_missing=True)
+        )
+
 
 rule build_imagelist:
     output: 
-        OUTPUT_DIR + 'imagesetlist.csv',
+        'imagesetlist.csv',
     shell:
-        # Must quote whatever that will be used as paths
+        # Must quote whatever that will be used as paths as they *might*
+        # contain spaces...
         "python scripts/build_imagelist.py "
-                "'{config[input][basedir]}' "
-                "'{config[input][subdir]}' "
-                "{config[input][ext]} "
-                "'{pep.config[metadata][movie][pattern]}' "
-                "'{config[input][samplesheet]}' "
+                "'{config[input][raw][base_dir]}' "
+                "'{config[input][raw][subdir_name]}' "
+                "{config[input][raw][ext]} "
+                "'{pep.config[experiments][movie][path_pattern]}' "
+                "'{config[input][samplesheet_path]}' "
                 "'{output}' "
-                "--nafilter strict --patch --verbose"
+                "--datefmt {pep.config[experiments][movie][datefmt]} "
+                "--nafilter {config[build_imagelist][nafilter]} "
+                "{config[build_imagelist][options]}"
 
 rule draw_roi:
     input: 
-        OUTPUT_DIR + 'imagesetlist.csv'
+        'imagesetlist.csv',
     output:
-        OUTPUT_DIR + 'roilist.csv'
-    shell:
-        "python scripts/draw_roi.py '{input}' '{output}'"
+        'roilist.csv'
+    script:
+        "scripts/draw_roi.py"
 
-
-
-OUTPUT_DIR_CROP = OUTPUT_DIR + "single_nuc_movie/"
+# Note:
+#   Defining output by touching a file inside the desired output folder
+#   (specified same as params.outdir) ensures that folder gets created.
+#   This means that the script doesn't need to check/create by itself.
+#   We also don't need to explicitly do mkdir before calling the script.
 checkpoint crop_roi:
     input:
-        OUTPUT_DIR + 'roilist.csv'
+        'roilist.csv'
     output:
-        touch(OUTPUT_DIR + ".crop_roi.done")
-    shell:
-        """
-        mkdir -p '{OUTPUT_DIR_CROP}'
-        python scripts/crop_roi.py '{input}' '{OUTPUT_DIR_CROP}'
-        """
+        touch("single_nuc_movie/.done")
+    params:
+        outdir = "single_nuc_movie"
+    script:
+        "scripts/crop_roi.py"
+
+
+rule split_channels:
+    input:
+        "single_nuc_movie/{RoiUID}.ome.tif"
+    output:
+        expand("single_nuc_movie/{ch}/{RoiUID}.ome.tif", 
+               ch=ALL_CH, allow_missing=True)
+    script:
+        "scripts/split_channels.py"
+
+
+# Dummy rule to target post-checkpoint rule (`split_channels`, in this
+# case).
+# 
+# Use this as target rule instead of the actual rule `split_channels"
+# as functions are only allowed for input but not output. This way, we
+# don't have to modify the `all` rule just to test or target other 
+# rules post checkpoint.    
+rule all_split_channels:
+    input:
+        Checkpoint_MakePattern(
+            expand("single_nuc_movie/{ch}/{RoiUID}.ome.tif", 
+            ch=ALL_CH, allow_missing=True)
+        )
 
 
 rule segment_nuclei_in_time:
     input:
-        OUTPUT_DIR + "single_nuc_movie/{RoiUID}.ome.tif"
+        "single_nuc_movie/{params.ch_to_seg}/{RoiUID}.ome.tif"
     output:
-        OUTPUT_DIR + "single_nuc_mask_movie/{RoiUID}.ome.tif"
+        "single_nuc_mask_movie/{RoiUID}.ome.tif"
+    params:
+        ch_to_seg = config['segment_nuclei_in_time']['channel']
     shell:
-        "python scripts/segment_nuclei_in_time.py '{input}' '{output}' --ch 1"
+        "python scripts/segment_nuclei_in_time.py '{input}' '{output}'"
+
+
+rule piv:
+    input:
+        "single_nuc_movie/{ch}/{RoiUID}.ome.tif"
+    output:
+        "piv/{ch}/{RoiUID}.mat"
+    params:
+        matlab = config['software']['matlab_path'],
+        scriptdir = config['software']['mfile_dir'],
+    shell:
+        # Note that in order for {input} {output} to still be relative
+        # to dir where Snakemake is invoked, we need to start matlab
+        # in the same directory (hence, `-sd <dir/to/launch>` doesn't 
+        # fit). 
+        """
+        {params.matlab} -batch "addpath('{params.scriptdir}'); matpiv_v2('{input}', '{output}')"
+        """

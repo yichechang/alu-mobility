@@ -20,6 +20,7 @@ def main(
         pat: str, 
         samplesheet: str,
         outputpath: str,
+        datefmt: Optional[str] = None,
         nafilter: Optional[str] = 'strict',
         patch: Optional[bool] = True,
         verbose: Optional[bool] = True,
@@ -40,9 +41,11 @@ def main(
         path to samplesheet.
     outputdir : str
         path to output directory.
+    datefmt : str
+        format for parsing date. e.g., '%y%m%d'
     """
     flist = curate.list_matching_files(rootdir, parentdirs, ext, verbose)
-    parsed = curate.parse_filepaths(flist, pat, nafilter, verbose)
+    parsed = curate.parse_filepaths(flist, pat, datefmt, nafilter, verbose)
     samplesheet = curate.read_samplesheet(samplesheet)
     merged = curate.merge_sample_metadata(parsed, samplesheet, patch)
 
