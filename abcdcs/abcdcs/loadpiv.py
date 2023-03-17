@@ -54,10 +54,14 @@ def read_matpiv(matfpath) -> xr.Dataset:
     pivresult = convert_pivresult_to_dict(matfpath)
 
     # Assemble into xrarry Dataset for all lag times 
-    ds = (xr.concat([convert_single_lag(d) for d in pivresult["data"]],
-                     dim='lag')
-            .sortby('lag')
-            .assign_attrs(pivresult["meta"])
+    ds = (
+        xr.concat(
+            [convert_single_lag(d) 
+             for d in pivresult["data"] if d["piv"] is not None],
+            dim='lag'
+        )
+        .sortby('lag')
+        .assign_attrs(pivresult["meta"])
     )
 
 
