@@ -122,13 +122,18 @@ rule all_split_channels:
 
 rule segment_nuclei_in_time:
     input:
-        "single_nuc_movie/{params.ch_to_seg}/{RoiUID}.ome.tif"
+        expand("single_nuc_movie/{ch}/{RoiUID}.ome.tif",
+               ch=config['segment_nuclei_in_time']['channel'],
+               allow_missing=True)
     output:
         "single_nuc_mask_movie/{RoiUID}.ome.tif"
-    params:
-        ch_to_seg = config['segment_nuclei_in_time']['channel']
-    shell:
-        "python scripts/segment_nuclei_in_time.py '{input}' '{output}'"
+    script:
+        "scripts/segment_nuclei_in_time.py"
+
+
+rule all_segment_nuclei:
+    input:
+        Checkpoint_MakePattern("single_nuc_mask_movie/{RoiUID}.ome.tif")
 
 
 rule piv:

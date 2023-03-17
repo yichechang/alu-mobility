@@ -62,4 +62,7 @@ def main(input_fpath: str, output_fpath: str, ch: int = 0):
 
 
 if __name__ == '__main__':
-    typer.run(main)
+    if 'snakemake' in globals():
+        main(snakemake.input[0], snakemake.output[0])
+    else:
+        typer.run(main)
