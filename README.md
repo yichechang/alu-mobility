@@ -20,7 +20,7 @@ in an yaml file. See the [issue and solution](https://github.com/mamba-org/mamba
 
 ```
 mamba create -n abcd
-mambe update -n abcd -f environments/abcd.yaml
+mamba env update -n abcd -f workflow/envs/abcd.yaml
 ```  
 
 #### MATLAB

@@ -41,4 +41,4 @@ dependencies:
     - bioformats-jar
     - cellpose
     - session-info
-    - -e ../abcdcs
+    - -e ../../abcdcs
