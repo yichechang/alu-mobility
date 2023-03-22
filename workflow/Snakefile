@@ -1,5 +1,3 @@
-import pandas as pd
-
 # Default to using the config file in the same respository as this 
 # Snakefile. Alternatively, you can specify a different config file
 # via commandline option `--configfile <path/to/config.yaml>`.
@@ -7,33 +5,15 @@ configfile: workflow.source_path('../config/config.yaml')
 
 pepfile: config['input']['pepfile_path']
 
-# Code from reference:
-# http://ivory.idyll.org/blog/2021-snakemake-checkpoints.html
-class Checkpoint_MakePattern:
-    def __init__(self, pattern):
-        self.pattern = pattern
+# (1) it's critical to set these regex constrains, to reduce chance of 
+#     bad parsing for "ch1/UID1.ome.tif" with pattern 
+#     "{ch}/{RoiUID}.ome.tif" to yield wildcard RoiUID = "ch1/UID1"
+# (2) this should work globally, EXCEPT FOR inside an glob_wildcards() 
+#     call where you need to specify manually! See [related issue](https://github.com/snakemake/snakemake/issues/1726) 
+wildcard_constraints:
+    RoiUID = "[\w-]+",
+    ch = "[\w-]+",
 
-    def __call__(self, w):
-        global checkpoints
-
-        # wait for the results of 'check_crop_roi'; this will trigger an
-        # exception until that rule has been run.
-        checkpoints.crop_roi.get(**w)
-
-        # the magic, such as it is, happens here: we create the
-        # information used to expand the pattern, using arbitrary
-        # Python code.
-        names = self.get_names()
-        pattern_expanded = expand(self.pattern, RoiUID=names)
-        # TODO: 
-        #   - why doesn't the following work? and how is w actually 
-        #     even used in above line `checkpoints.check_crop_roi.get(**w)`
-        #
-        # pattern_expanded = expand(self.pattern, RoiUID=names, **w)
-        return pattern_expanded
-
-    def get_names(self):
-        return pd.read_csv('roilist.csv')['RoiUID'].to_list()
 
 def get_channel_names():
     channels = (pep.config['experiments']
@@ -44,11 +24,16 @@ def get_channel_names():
 ALL_CH = get_channel_names()
 
 
+def get_checkpoint_RoiUID(wildcards):
+    checkpoints.crop_roi.get(**wildcards)
+    return glob_wildcards("single_nuc_movie/{RoiUID, [\w-]+}.ome.tif").RoiUID
+
+
 rule all:
     input:
-        Checkpoint_MakePattern(
-            expand("piv/{ch}/{RoiUID}.mat", ch=ALL_CH, allow_missing=True)
-        )
+        lambda w: expand("piv/{ch}/{RoiUID}.mat", 
+                         ch=ALL_CH, 
+                         RoiUID=get_checkpoint_RoiUID(w))
 
 
 rule build_imagelist:
@@ -97,13 +82,12 @@ rule split_channels:
 # Use this as target rule instead of the actual rule `split_channels"
 # as functions are only allowed for input but not output. This way, we
 # don't have to modify the `all` rule just to test or target other 
-# rules post checkpoint.    
+# rules post checkpoint.   
 rule all_split_channels:
     input:
-        Checkpoint_MakePattern(
-            expand("single_nuc_movie/{ch}/{RoiUID}.ome.tif", 
-            ch=ALL_CH, allow_missing=True)
-        )
+        lambda w: expand("single_nuc_movie/{ch}/{RoiUID}.ome.tif", 
+                         ch=ALL_CH, 
+                         RoiUID=get_checkpoint_RoiUID(w))
 
 
 rule segment_nuclei_in_time:
@@ -119,7 +103,8 @@ rule segment_nuclei_in_time:
 
 rule all_segment_nuclei:
     input:
-        Checkpoint_MakePattern("single_nuc_mask_movie/{RoiUID}.ome.tif")
+        lambda w: expand("single_nuc_mask_movie/{RoiUID}.ome.tif", 
+                         RoiUID=get_checkpoint_RoiUID(w))
 
 
 rule piv:
