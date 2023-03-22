@@ -8,24 +8,25 @@
 # characters are used. More importantly, even if they are quoted here,
 # they still need to be quoted again when used in the "shell" derivative.
 input:
-  pepfile_path: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/raw_nd2/project_config.yaml
+  pepfile_path: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/test-snakemake/raw_nd2/project_config.yaml
   experiment_type: movie
-  samplesheet_path: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/230307_test_alu_h2b_dual/raw_nd2/samplesheet.csv
+  samplesheet_path: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/test-snakemake/raw_nd2/samplesheet.csv
   raw:
     base_dir: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses
-    subdir_name: 230307_test_alu_h2b_dual
+    subdir_name: test-snakemake
     ext: nd2
 
 build_imagelist:
   nafilter: strict
-  options: >
-    --patch
-    --verbose
+  patch: True
+  verbose: True
 
 segment_nuclei_in_time:
   channel: sfGFP
 
 piv:
+  pkg_path: "external/MatPIV-1.7"
+  protocol: matpiv_v2
   channel: miRFP670
 
 # ======================================================================
@@ -33,6 +34,3 @@ piv:
 # Platform-specific configurations
 #
 # ======================================================================
-software:
-  matlab_path: /Applications/MATLAB_R2019b.app/bin/matlab
-  mfile_dir: /Users/yi-che/repository/phd-analysis/abc-mobility/scripts 

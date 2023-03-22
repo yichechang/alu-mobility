@@ -1,12 +1,9 @@
 import pandas as pd
 
-# this is set relative to where Snakefile is *stored* (but *not called*)
-# thus there're two ways for configuring this workflow
-#   1. modify the config file in-place, OR
-#   2. duplicate the config file to the analysis directory, and then
-#      specify its location as option when launching snakemake via 
-#      commandline
-configfile: workflow.source_path('snakemake_config.yaml')
+# Default to using the config file in the same respository as this 
+# Snakefile. Alternatively, you can specify a different config file
+# via commandline option `--configfile <path/to/config.yaml>`.
+configfile: workflow.source_path('../config/config.yaml')
 
 pepfile: config['input']['pepfile_path']
 
@@ -57,19 +54,8 @@ rule all:
 rule build_imagelist:
     output: 
         'imagesetlist.csv',
-    shell:
-        # Must quote whatever that will be used as paths as they *might*
-        # contain spaces...
-        "python scripts/build_imagelist.py "
-                "'{config[input][raw][base_dir]}' "
-                "'{config[input][raw][subdir_name]}' "
-                "{config[input][raw][ext]} "
-                "'{pep.config[experiments][movie][path_pattern]}' "
-                "'{config[input][samplesheet_path]}' "
-                "'{output}' "
-                "--datefmt {pep.config[experiments][movie][datefmt]} "
-                "--nafilter {config[build_imagelist][nafilter]} "
-                "{config[build_imagelist][options]}"
+    script:
+        "scripts/build_imagelist.py"
 
 rule draw_roi:
     input: 
@@ -142,13 +128,15 @@ rule piv:
     output:
         "piv/{ch}/{RoiUID}.mat"
     params:
-        matlab = config['software']['matlab_path'],
-        scriptdir = config['software']['mfile_dir'],
+        scriptdir = workflow.source_path('scripts'),
+        protocol = config['piv']['protocol'],
+    envmodules:
+        "matlab/R2019b"
     shell:
         # Note that in order for {input} {output} to still be relative
         # to dir where Snakemake is invoked, we need to start matlab
         # in the same directory (hence, `-sd <dir/to/launch>` doesn't 
         # fit). 
         """
-        {params.matlab} -batch "addpath('{params.scriptdir}'); matpiv_v2('{input}', '{output}')"
+        matlab -batch "addpath('{params.scriptdir}', genpath('{params.pivpkg}')); {params.protocol}('{input}', '{output}')"
         """

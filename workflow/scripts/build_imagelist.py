@@ -7,7 +7,7 @@
 List files from specified dirs and parse metadata from filename.
 '''
 
-from typing import Optional, List
+from typing import Dict, Optional, List
 import typer
 
 from abcdcs import curate
@@ -53,5 +53,30 @@ def main(
     # double-quotes (quoting=2).
     merged.to_csv(outputpath, quoting=2, index=False, header=True)
 
+def get_pepfile_dict(pepfile_path: str) -> Dict:
+    import yaml
+    with open(pepfile_path, 'rb') as f:  
+        conf = yaml.load(f, Loader=yaml.CLoader)
+    return conf
+
 if __name__ == '__main__':
-    typer.run(main)
+    try:
+        snakemake
+    except NameError:
+        snakemake = None
+    if snakemake is not None:
+        exptype = snakemake.config['input']['experiment_type']
+        pep = get_pepfile_dict(snakemake.config['input']['pepfile_path'])
+        main(snakemake.config['input']['raw']['base_dir'], 
+             snakemake.config['input']['raw']['subdir_name'],
+             snakemake.config['input']['raw']['ext'],
+             pep['experiments'][exptype]['path_pattern'],
+             snakemake.config['input']['samplesheet_path'],
+             snakemake.output[0],
+             pep['experiments'][exptype]['datefmt'],
+             snakemake.config['build_imagelist']['nafilter'],
+             snakemake.config['build_imagelist']['patch'],
+             snakemake.config['build_imagelist']['verbose'],
+        )
+    else:
+        typer.run(main)

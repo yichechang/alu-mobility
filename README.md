@@ -22,3 +22,9 @@ in an yaml file. See the [issue and solution](https://github.com/mamba-org/mamba
 mamba create -n abcd
 mambe update -n abcd -f environments/abcd.yaml
 ```  
+
+#### MATLAB
+
+You'll need to have `matlab` on your path. This can either be done by 
+manually creating a symbolic link to the matlab executable, or by using
+the environment modules on a cluster (e.g. `module load matlab/R2019b`).
