@@ -5,6 +5,8 @@ configfile: workflow.source_path('../config/config.yaml')
 
 pepfile: config['input']['pepfile_path']
 
+# Exclude forward slash in wildcards matching.
+# (0) via setting allowed classes of characters
 # (1) it's critical to set these regex constrains, to reduce chance of 
 #     bad parsing for "ch1/UID1.ome.tif" with pattern 
 #     "{ch}/{RoiUID}.ome.tif" to yield wildcard RoiUID = "ch1/UID1"
@@ -113,8 +115,11 @@ rule piv:
     output:
         "piv/{ch}/{RoiUID}.mat"
     params:
-        scriptdir = workflow.source_path('scripts'),
         protocol = config['piv']['protocol'],
+        pivpkg = str(
+            Path(workflow.current_basedir) /
+            config['piv']['pkg_path']),
+        mfiledir = str(Path(workflow.current_basedir) / "scripts"),
     envmodules:
         "matlab/R2019b"
     shell:
@@ -123,5 +128,5 @@ rule piv:
         # in the same directory (hence, `-sd <dir/to/launch>` doesn't 
         # fit). 
         """
-        matlab -batch "addpath('{params.scriptdir}', genpath('{params.pivpkg}')); {params.protocol}('{input}', '{output}')"
+        matlab -batch "addpath('{params.mfiledir}', genpath('{params.pivpkg}')); {params.protocol}('{input}', '{output}')"
         """
