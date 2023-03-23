@@ -8,11 +8,11 @@
 # characters are used. More importantly, even if they are quoted here,
 # they still need to be quoted again when used in the "shell" derivative.
 input:
-  pepfile_path: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/test-snakemake/raw_nd2/project_config.yaml
+  pepfile_path: /tigress/yichec/data/microscopy/test-snakemake/project_config.yaml
   experiment_type: movie
-  samplesheet_path: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/test-snakemake/raw_nd2/samplesheet.csv
+  samplesheet_path: /tigress/yichec/data/microscopy/test-snakemake/samplesheet.csv
   raw:
-    base_dir: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses
+    base_dir: /tigress/yichec/data/microscopy
     subdir_name: test-snakemake
     ext: nd2
 
