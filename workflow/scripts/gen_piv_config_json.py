@@ -7,9 +7,10 @@ def main(fpath: str, confs: List[Dict]) -> None:
         json.dump(conf, fp, indent=4)
 
 if __name__ == '__main__':
-    main(snakemake.output[0],
-         [
-            snakemake.params['moviemeta'],
-            snakemake.params['pivconfig'],
-         ]
-    )
+    if 'snakemake' in globals():
+        main(snakemake.output[0],
+            [
+                snakemake.params['moviemeta'],
+                snakemake.params['pivconfig'],
+            ]
+        )

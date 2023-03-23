@@ -60,11 +60,7 @@ def get_pepfile_dict(pepfile_path: str) -> Dict:
     return conf
 
 if __name__ == '__main__':
-    try:
-        snakemake
-    except NameError:
-        snakemake = None
-    if snakemake is not None:
+    if 'snakemake' in globals():
         exptype = snakemake.config['input']['experiment_type']
         pep = get_pepfile_dict(snakemake.config['input']['pepfile_path'])
         main(snakemake.config['input']['raw']['base_dir'], 

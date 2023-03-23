@@ -36,11 +36,7 @@ def crop_rois_from_a_file(df: pd.DataFrame, *, output_dir: str) -> None:
 
 
 if __name__ == '__main__':
-    try:
-        snakemake
-    except NameError:
-        snakemake = None
-    if snakemake is not None:
+    if 'snakemake' in globals():
         main(snakemake.input[0], 
              snakemake.params['outdir'])
     else:
