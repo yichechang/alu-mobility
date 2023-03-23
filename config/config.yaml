@@ -26,8 +26,24 @@ segment_nuclei_in_time:
 
 piv:
   pkg_path: "external/MatPIV-1.7"
-  protocol: matpiv_v2
   channel: miRFP670
+  movie_meta:
+    PIXELSIZE: 0.135
+    DT: 0.5
+    LAGS_EXPRESSION: "unique(ceil(logspace(0,log10(50),15)))" 
+  protocol: matpiv_v2
+  protocol_configs:
+    matpiv_v2:
+      PREPROCESS:
+        BACK: 210
+      PIV:
+        WINSIZE: 16
+        OVERLAP: 0.75
+        MODE: 'single'
+      FILTERS:
+        SNR: 1.1
+        PKH: 0.3
+        GLOBAL: 3
 
 # ======================================================================
 #

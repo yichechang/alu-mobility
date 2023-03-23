@@ -1,63 +1,36 @@
-function matpiv_v2n1(inpath, outpath)
+function matpiv_v2(inpath, outpath, confpath, ncores)
+    
+    % ==================================================
+    % LOAD CONFIGURATIONS
+    % ==================================================
+    
+    conf = load_config_from_json(confpath);
+
+    PIXELSIZE = conf.PIXELSIZE;
+    DT = conf.DT;
+    LAGS = eval(conf.LAGS_EXPRESSION);
+    CONFIG = conf.CONFIG;
+    
 
     % ==================================================
-    % DEFINE SAMPLE RELATED INFO
+    % Start parallel pool
     % ==================================================
-    PIXELSIZE = 0.16;
-    DT = 0.2;
-    LAGS = unique(ceil(logspace(0, 2, 15)));
-    
-    % ==================================================
-    % CONFIGURATIONS
-    % ==================================================
-    
-    MATPIV_PATH = "~/matlab/MatPIV17";
-    
-    
-    PREPROCESS = struct();
-    PREPROCESS.BACK = 210;
-    
-    PIV = struct();
-    PIV.WINSIZE = 16;
-    PIV.OVERLAP = 0.75;
-    PIV.MODE = 'single';
-    
-    FILTERS = struct();
-    FILTERS.SNR = 1.1;
-    FILTERS.PKH = 0.3;
-    FILTERS.GLOBAL = 3;
-    
-    % Collect configurations to be saved with output
-    CONFIG = struct();
-    CONFIG.PREPROCESS = PREPROCESS;
-    CONFIG.PIV = PIV;
-    CONFIG.FILTERS = FILTERS;
-    
-    
-    
-    % ==================================================
-    % END OF CONFIGURATIONS
-    % ==================================================
-    % ==================================================
-    % ==================================================
-    % ==================================================
-    
-    
-    % ==================================================
-    % Setting up matlab
-    % ==================================================
-    
-    % add matpiv path if not already on search path
-    if exist("matpiv", 'file') ~= 2
-        addpath(genpath(MATPIV_PATH));
+    % by default, should use all available cores assigned
+    global parforM
+    if ncores > 1
+        pobj = parpool(ncores);
+        parforM = ncores;
+    else
+        parforM = 0;
     end
-    
+
+
     
     % ==================================================
     % Main
     % ==================================================
     pivresult = piv_single_movie(inpath, ...
-        PREPROCESS.BACK, DT, PIXELSIZE, LAGS, CONFIG);
+        CONFIG.PREPROCESS.BACK, DT, PIXELSIZE, LAGS, CONFIG);
     save(outpath, 'pivresult', '-v6');
     
 end % end of main function
@@ -65,6 +38,14 @@ end % end of main function
 % ++++++++++++++++++++++++++++++++++++++++++++++++++
 % Sub-functions
 % ++++++++++++++++++++++++++++++++++++++++++++++++++
+
+function conf = load_config_from_json(config_fpath)
+    % load json as struct
+    fid = fopen(config_fpath);
+    raw = fread(fid,inf);
+    conf = jsondecode(char(raw'));
+    fclose(fid);
+end
 
 % ==================================================
 % PIV related functions
@@ -141,6 +122,8 @@ end
 
 
 function res = piv_single_lag(movie, lag, config)
+    global parforM
+    
     idx = get_paired_index(movie, lag);
     
     % duplication of data here for performant parfor
@@ -148,7 +131,7 @@ function res = piv_single_lag(movie, lag, config)
     second_frames = movie(:,:,idx(:,2));
     
     res = struct();
-    for i = 1:size(idx, 1)
+    parfor (i = 1:size(idx, 1), parforM)
         res(i).data = mypiv(...
             first_frames(:,:,i), second_frames(:,:,i), ...
             config);

@@ -1,3 +1,6 @@
+
+import json
+
 # Default to using the config file in the same respository as this 
 # Snakefile. Alternatively, you can specify a different config file
 # via commandline option `--configfile <path/to/config.yaml>`.
@@ -108,10 +111,22 @@ rule all_segment_nuclei:
         lambda w: expand("single_nuc_mask_movie/{RoiUID}.ome.tif", 
                          RoiUID=get_checkpoint_RoiUID(w))
 
+rule gen_piv_config_json:
+    output:
+        expand("{protocol}_config.json", 
+               protocol=config['piv']['protocol'])
+    params:
+        pivconfig = config['piv']['protocol_configs'][config['piv']['protocol']],
+        moviemeta = config['piv']['movie_meta'],
+    script:
+        "scripts/gen_piv_config_json.py"
+
 
 rule piv:
     input:
-        "single_nuc_movie/{ch}/{RoiUID}.ome.tif"
+        pivconfig = expand("{protocol}_config.json", 
+                           protocol=config['piv']['protocol']),
+        movie = "single_nuc_movie/{ch}/{RoiUID}.ome.tif"
     output:
         "piv/{ch}/{RoiUID}.mat"
     params:
@@ -120,6 +135,9 @@ rule piv:
             Path(workflow.current_basedir) /
             config['piv']['pkg_path']),
         mfiledir = str(Path(workflow.current_basedir) / "scripts"),
+    threads: 1  # While our mfile can use more than one core, somehow
+                # snakemake doesn't play well with it and matlab will
+                # fail at starting its parpool. 
     envmodules:
         "matlab/R2019b"
     shell:
@@ -128,5 +146,5 @@ rule piv:
         # in the same directory (hence, `-sd <dir/to/launch>` doesn't 
         # fit). 
         """
-        matlab -batch "addpath('{params.mfiledir}', genpath('{params.pivpkg}')); {params.protocol}('{input}', '{output}')"
+        matlab -batch "addpath('{params.mfiledir}', genpath('{params.pivpkg}')); {params.protocol}('{input.movie}', '{output}', '{input.pivconfig}', 1)"
         """
