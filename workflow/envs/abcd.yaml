@@ -39,6 +39,7 @@ dependencies:
     - aicsimageio[nd2]
     - aicsimageio[base-imageio]
     - bioformats-jar
+    - git+https://github.com/tlambert03/ome-types.git@ae84abff0fa3371e69ce9d7f99d79a8d95c5d0c7#egg=ome-types
     - cellpose
     - session-info
     - -e ../../abcdcs
