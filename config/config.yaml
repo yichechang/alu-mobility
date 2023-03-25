@@ -37,16 +37,17 @@ piv:
   protocol: matpiv_v2
   protocol_configs:
     matpiv_v2:
-      PREPROCESS:
-        BACK: 210
-      PIV:
-        WINSIZE: 16
-        OVERLAP: 0.75
-        MODE: 'single'
-      FILTERS:
-        SNR: 1.1
-        PKH: 0.3
-        GLOBAL: 3
+      CONFIG:
+        PREPROCESS:
+          BACK: 210
+        PIV:
+          WINSIZE: 16
+          OVERLAP: 0.75
+          MODE: 'single'
+        FILTERS:
+          SNR: 1.1
+          PKH: 0.3
+          GLOBAL: 3
 
 # ======================================================================
 #
