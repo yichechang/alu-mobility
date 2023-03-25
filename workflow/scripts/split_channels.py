@@ -31,11 +31,7 @@ def extract_channel_info(pepfile_path: str, exptype: str) -> Dict:
 
 
 if __name__ == '__main__':
-    try:
-        snakemake
-    except NameError:
-        snakemake = None
-    if snakemake is not None:
+    if 'snakemake' in globals():
         chinfo_dict = extract_channel_info(
             snakemake.config['input']['pepfile_path'], 
             snakemake.config['input']['experiment_type'])

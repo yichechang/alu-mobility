@@ -8,11 +8,14 @@
 # characters are used. More importantly, even if they are quoted here,
 # they still need to be quoted again when used in the "shell" derivative.
 input:
-  pepfile_path: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/test-snakemake/raw_nd2/project_config.yaml
+  pepfile_path: /tigress/yichec/data/microscopy/2023a/test-snakemake/project_config.yaml
+  samplesheet_path: /tigress/yichec/data/microscopy/2023a/test-snakemake/samplesheet.csv
   experiment_type: movie
-  samplesheet_path: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses/alu_imaging/test-snakemake/raw_nd2/samplesheet.csv
   raw:
-    base_dir: /Users/yi-che/Dropbox (Princeton)/phd/phd-data/analyses
+    base_dir: /tigress/yichec/data/
+    # write in one line, with single quotes, and write \/ for forward
+    # slash, write \ for backslash
+    common_pattern: 'microscopy\/\d{4}[a-d]\/.*'
     subdir_name: test-snakemake
     ext: nd2
 
@@ -34,16 +37,17 @@ piv:
   protocol: matpiv_v2
   protocol_configs:
     matpiv_v2:
-      PREPROCESS:
-        BACK: 210
-      PIV:
-        WINSIZE: 16
-        OVERLAP: 0.75
-        MODE: 'single'
-      FILTERS:
-        SNR: 1.1
-        PKH: 0.3
-        GLOBAL: 3
+      CONFIG:
+        PREPROCESS:
+          BACK: 210
+        PIV:
+          WINSIZE: 16
+          OVERLAP: 0.75
+          MODE: 'single'
+        FILTERS:
+          SNR: 1.1
+          PKH: 0.3
+          GLOBAL: 3
 
 # ======================================================================
 #

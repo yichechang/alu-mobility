@@ -134,6 +134,10 @@ rule draw_roi:
 rule build_imagelist:
     output: 
         'imagesetlist.csv',
+    resources:
+        mem = 500,
+        time = 10,
+        short_jobs = 1,
     script:
         "scripts/build_imagelist.py"
 
@@ -150,6 +154,10 @@ checkpoint crop_roi:
         touch("single_nuc_movie/.done")
     params:
         outdir = "single_nuc_movie"
+    resources:
+        mem = 4000, 
+        time = 30, 
+        short_jobs = 1, # <61 minutes
     script:
         "scripts/crop_roi.py"
 
@@ -163,6 +171,12 @@ rule split_channels:
     output:
         expand("single_nuc_movie/{ch}/{RoiUID}.ome.tif", 
                ch=ALL_CH, allow_missing=True)
+    group:
+        "grp_split"
+    resources:
+        mem = 2000, 
+        time = 5, 
+        # short_jobs = 1, # <61 minutes
     script:
         "scripts/split_channels.py"
 
@@ -174,6 +188,12 @@ rule segment_nuclei_in_time:
                allow_missing=True)
     output:
         "single_nuc_mask_movie/{RoiUID}.ome.tif"
+    group:
+        "grp_segment"
+    resources:
+        mem = 4000, 
+        time = 10, 
+        # short_jobs = 1, # <61 minutes
     script:
         "scripts/segment_nuclei_in_time.py"
 
@@ -185,6 +205,10 @@ rule gen_piv_config_json:
     params:
         pivconfig = config['piv']['protocol_configs'][config['piv']['protocol']],
         moviemeta = config['piv']['movie_meta'],
+    resources:
+        mem = 500,
+        time = 10,
+        short_jobs = 1,
     script:
         "scripts/gen_piv_config_json.py"
 
@@ -207,6 +231,12 @@ rule piv:
                 # fail at starting its parpool. 
     envmodules:
         "matlab/R2019b"
+    group:
+        "grp_piv"
+    resources:
+        mem = 2000, 
+        time = 10, 
+        # short_jobs = 1, # <61 minutes
     shell:
         # Note that in order for {input} {output} to still be relative
         # to dir where Snakemake is invoked, we need to start matlab
