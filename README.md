@@ -10,7 +10,7 @@ Date started: 2023-02-02
 
 ## Dependencies
 
-Dependencies are listed in [environments/abcd.yaml](environments/abcd.yaml) 
+Dependencies are listed in [workflow/envs/abcd.yaml](workflow/envs/abcd.yaml) 
 file and can be installed as a conda environment using either conda or
 mamba. 
 
@@ -73,7 +73,7 @@ In the future, it might make sense to keep track of them separately,
 but currently their development is closely related. Thus, we now use a 
 single tagging system for version tracking. 
 
-The format is `yyyy-mm-dd.[a-z]` where `[a-z]` is used to differentiate
+The format is `yyyy.MM.dd.[a-z]` where `[a-z]` is used to differentiate
 versions tagged on the same date.
 
 - `2023.03.26.a`
