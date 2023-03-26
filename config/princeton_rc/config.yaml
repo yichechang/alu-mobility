@@ -5,6 +5,7 @@
 # basic configuration
 use-singularity: true
 use-conda: true
+use-envmodules: true
 conda-frontend: conda
 printshellcmds: true
 
