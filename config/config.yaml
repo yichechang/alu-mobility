@@ -29,7 +29,9 @@ segment_nuclei_in_time:
 
 piv:
   pkg_path: "external/MatPIV-1.7"
-  channel: miRFP670
+  channel: 
+    - miRFP670
+    - sfGFP
   movie_meta:
     PIXELSIZE: 0.135
     DT: 0.5

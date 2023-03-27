@@ -1,4 +1,4 @@
-import json
+from pathlib import Path
 
 
 # ======================================================================
@@ -30,6 +30,7 @@ pepfile: config['input']['pepfile_path']
 wildcard_constraints:
     RoiUID = "[\w-]+",
     ch = "[\w-]+",
+    protocol = "[\w-]+",
 
 
 def get_channel_names():
@@ -64,6 +65,7 @@ localrules:
     all,
     all_split_channels,
     all_segment_nuclei,
+    all_piv,
     build_imagelist,
     draw_roi,
     crop_roi,
@@ -76,9 +78,8 @@ localrules:
 # -------------------------------------
 rule all:
     input:
-        lambda w: expand("piv/{ch}/{RoiUID}.mat", 
-                         ch=ALL_CH, 
-                         RoiUID=get_checkpoint_RoiUID(w))
+        ".all_piv",
+        ".all_segment_nuclei",
 
 
 # -------------------------------------
@@ -101,12 +102,32 @@ rule all_split_channels:
         lambda w: expand("single_nuc_movie/{ch}/{RoiUID}.ome.tif", 
                          ch=ALL_CH, 
                          RoiUID=get_checkpoint_RoiUID(w))
+    output:
+        ".all_split_channels"
+    shell:
+        "touch {output}"
 
 
 rule all_segment_nuclei:
     input:
         lambda w: expand("single_nuc_mask_movie/{RoiUID}.ome.tif", 
                          RoiUID=get_checkpoint_RoiUID(w))
+    output:
+        ".all_segment_nuclei"
+    shell:
+        "touch {output}"
+
+
+rule all_piv:
+    input:
+        lambda w: expand("piv/{protocol}/{ch}/{RoiUID}.mat",
+                         protocol=config['piv']['protocol'],
+                         ch=config['piv']['channel'],
+                         RoiUID=get_checkpoint_RoiUID(w))
+    output:
+        ".all_piv"
+    shell:
+        "touch {output}"
 
 
 # -------------------------------------
@@ -208,7 +229,7 @@ rule piv:
                            protocol=config['piv']['protocol']),
         movie = "single_nuc_movie/{ch}/{RoiUID}.ome.tif"
     output:
-        "piv/{ch}/{RoiUID}.mat"
+        "piv/{protocol}/{ch}/{RoiUID}.mat"
     params:
         protocol = config['piv']['protocol'],
         pivpkg = str(
