@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 
 from aicsimageio import AICSImage
-from aicsimageio.readers.nd2_reader import ND2Reader
 from aicsimageio.writers import OmeTiffWriter
 
 import typer
@@ -34,17 +33,16 @@ def crop_rois_from_a_file(
     im_path_original = df["ImagesetFilepath"].iloc[0]
     im_path = update_absolute_path(im_path_original, 
                                    common_pattern, platform_prefix)
-    im = AICSImage(im_path, reader=ND2Reader)
-    scale = im.physical_pixel_sizes.X
+    im = AICSImage(im_path)
 
     roi_records = df.to_dict('records')
 
     for roi in roi_records:
         # TODO
-        #   - Why do we bother using scale/.sel() instead of just .isel()?
-        ri, rf, ci, cf = scale * np.array([roi['ri'], roi['rf'], roi['ci'], roi['cf']])
+        #   - Validate that we don't rely on actual spatial coordinates
+        ri, rf, ci, cf = np.array([roi['ri'], roi['rf'], roi['ci'], roi['cf']]).astype(int)
 
-        cropped = im.xarray_data.sel(Y=slice(ri,rf), X=slice(ci,cf))
+        cropped = im.xarray_data.isel(Y=range(ri,rf+1), X=range(ci,cf+1))
         outpath = (Path(output_dir) / roi['RoiUID']).with_suffix('.ome.tif')
         OmeTiffWriter.save(cropped.data, str(outpath)) 
 
