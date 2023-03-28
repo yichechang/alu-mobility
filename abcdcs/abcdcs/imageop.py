@@ -202,13 +202,13 @@ class Normalize:
     @staticmethod
     def _pclip(data, p: float = 2.0):
         """
-        Rescale to [-1, 1] by percentile clipping at p% and (100-p)%.
+        Rescale to [0, 1] by percentile clipping at p% and (100-p)%.
 
         Default corresponds to p2 and p98.
         """
         p = np.nanpercentile(data, p)
         q = np.nanpercentile(data, 100-p)
-        return ((data - p) / (q - p) - 0.5) * 2
+        return (data - p) / (q - p)
 
 
 class Mask:
