@@ -215,7 +215,9 @@ class Mask:
 
     @staticmethod
     def read(fpath: str, fmt: str, 
-             channel_names: List[str] = ["mask"], **kwargs,
+             channel_names: List[str] = ["mask"], 
+             drop_single_C: bool = False, 
+             **kwargs,
     ) -> Union[xr.DataArray, xr.Dataset]:
         """
         Read mask and return as xarray.DataArray or xarray.Dataset.
@@ -245,7 +247,7 @@ class Mask:
             data_vars.)
         """
         reader = MaskReader(channel_names, **kwargs)
-        return reader.read(fpath, fmt)
+        return reader.read(fpath, fmt, drop_single_C=drop_single_C)
 
 
     # TODO:
