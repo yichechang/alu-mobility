@@ -118,6 +118,14 @@ rule all_segment_nuclei:
         "touch {output}"
 
 
+rule all_normalize_intensity:
+    input:
+        lambda w: expand("normalized_movie/nuc/{RoiUID}.ome.tif",
+                         RoiUID=get_checkpoint_RoiUID(w)),
+        lambda w: expand("normalized_movie/np/{RoiUID}.ome.tif",
+                         RoiUID=get_checkpoint_RoiUID(w)),
+
+
 rule all_piv:
     input:
         lambda w: expand("piv/{protocol}/{ch}/{RoiUID}.mat",
@@ -210,6 +218,21 @@ rule segment_nuclei_in_time:
         time = 61, 
     script:
         "scripts/segment_nuclei_in_time.py"
+
+
+rule normalize_intensity:
+    input:
+        image="single_nuc_movie/{RoiUID}.ome.tif",
+        mask="single_nuc_mask_movie/{RoiUID}.ome.tif",
+    output:
+        nuc="normalized_movie/nuc/{RoiUID}.ome.tif",
+        np="normalized_movie/np/{RoiUID}.ome.tif",
+    params:
+        chnames=ALL_CH,
+        outdir="normalized_movie/np",
+        background=config['normalize_intensity']['background'],
+    script:
+        "scripts/normalize_intensity.py"
 
 
 rule gen_piv_config_json:
