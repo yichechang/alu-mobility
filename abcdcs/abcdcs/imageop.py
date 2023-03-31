@@ -175,6 +175,12 @@ class ImageReader:
                     "bitdepth must be specified if rescale is True.")
             im /= (2**self._bitdepth - 1)
 
+        # Use integer index as coords for non-singlton dim without 
+        # coords
+        for d in im.squeeze().dims:
+            if d not in im.coords:
+                im = im.assign_coords({d: np.arange(im.sizes[d])})
+
         return im
 
 
