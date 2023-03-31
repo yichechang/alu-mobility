@@ -54,6 +54,10 @@ piv:
           PKH: 0.3
           GLOBAL: 3
 
+msnd:
+  channel: miRFP670
+  weight_channel: sfGFP
+
 # ======================================================================
 #
 # Platform-specific configurations
