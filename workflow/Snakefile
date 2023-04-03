@@ -40,6 +40,7 @@ def get_channel_names():
     return [c['fluoro'] for c in channels]
 ALL_CH = get_channel_names()
 
+ALL_PROTOCOLS = ['matpiv_v2']
 
 # ======================================================================
 # get wildcards from checkpoint
@@ -116,6 +117,22 @@ rule all_segment_nuclei:
         ".all_segment_nuclei"
     shell:
         "touch {output}"
+
+
+rule all_normalize_intensity:
+    input:
+        lambda w: expand("normalized_movie/nuc/{RoiUID}.ome.tif",
+                         RoiUID=get_checkpoint_RoiUID(w)),
+        lambda w: expand("normalized_movie/np/{RoiUID}.ome.tif",
+                         RoiUID=get_checkpoint_RoiUID(w)),
+
+
+rule all_msnd:
+    input:
+        lambda w: expand("msnd/{protocol}/{mode}/{RoiUID}_stats.csv",
+                         protocol=ALL_PROTOCOLS,
+                         mode=['normal', 'weighted'],
+                         RoiUID=get_checkpoint_RoiUID(w)),
 
 
 rule all_piv:
@@ -212,6 +229,21 @@ rule segment_nuclei_in_time:
         "scripts/segment_nuclei_in_time.py"
 
 
+rule normalize_intensity:
+    input:
+        image="single_nuc_movie/{RoiUID}.ome.tif",
+        mask="single_nuc_mask_movie/{RoiUID}.ome.tif",
+    output:
+        nuc="normalized_movie/nuc/{RoiUID}.ome.tif",
+        np="normalized_movie/np/{RoiUID}.ome.tif",
+    params:
+        chnames=ALL_CH,
+        outdir="normalized_movie/np",
+        background=config['normalize_intensity']['background'],
+    script:
+        "scripts/normalize_intensity.py"
+
+
 rule gen_piv_config_json:
     output:
         expand("{protocol}_config.json", 
@@ -252,3 +284,18 @@ rule piv:
         """
         matlab -batch "addpath('{params.mfiledir}', genpath('{params.pivpkg}')); {params.protocol}('{input.movie}', '{output}', '{input.pivconfig}', 1)"
         """
+
+rule msnd:
+    input:
+        piv="piv/{protocol}/" + config['msnd']['channel'] + "/{RoiUID}.mat",
+        image="normalized_movie/np/{RoiUID}.ome.tif",
+        mask="single_nuc_mask_movie/{RoiUID}.ome.tif",
+    output:
+        normal="msnd/{protocol}/normal/{RoiUID}_stats.csv",
+        weighted="msnd/{protocol}/weighted/{RoiUID}_stats.csv",
+    params:
+        chnames=ALL_CH,
+        background=config['normalize_intensity']['background'],
+        outdir="msnd/",
+    script:
+        "scripts/weighted_msnd.py"

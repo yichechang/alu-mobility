@@ -27,6 +27,9 @@ build_imagelist:
 segment_nuclei_in_time:
   channel: sfGFP
 
+normalize_intensity:
+  background: 400
+
 piv:
   pkg_path: "external/MatPIV-1.7"
   channel: 
@@ -50,6 +53,10 @@ piv:
           SNR: 1.1
           PKH: 0.3
           GLOBAL: 3
+
+msnd:
+  channel: miRFP670
+  weight_channel: sfGFP
 
 # ======================================================================
 #

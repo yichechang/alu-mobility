@@ -76,7 +76,11 @@ single tagging system for version tracking.
 The format is `yyyy.MM.dd.[a-z]` where `[a-z]` is used to differentiate
 versions tagged on the same date.
 
-- `2023.03.26.a`
+- `2023.03.31.a`: remove unused function in msnd
+- `2023.03.30.a`: **normalize intensity for y459 and y491 on della**
+- `2023.03.28.a`: **Improve raw data compatibility with tiff file without metadata**
+- `2023.03.26.c`: **matpiv_v2 della (used for y459)**
+- `2023.03.26.b`: snakemake on local and della up to PIV
     - Workflow runs on both local (everything to piv) and della 
       (from cropping to piv).
     - No job grouping should be used.
