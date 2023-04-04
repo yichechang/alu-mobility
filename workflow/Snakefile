@@ -114,27 +114,19 @@ rule all_split_channels:
         lambda w: expand("single_nuc_movie/{ch}/{RoiUID}.ome.tif", 
                          ch=ALL_CH, 
                          RoiUID=get_checkpoint_RoiUID(w))
-    output:
-        ".all_split_channels"
-    shell:
-        "touch {output}"
 
 
 rule all_segment_nuclei:
     input:
-        lambda w: expand("single_nuc_mask_movie/{RoiUID}.ome.tif", 
+        lambda w: expand("results/segmentation/nucleus/{RoiUID}.ome.tif", 
                          RoiUID=get_checkpoint_RoiUID(w))
-    output:
-        ".all_segment_nuclei"
-    shell:
-        "touch {output}"
 
 
 rule all_normalize_intensity:
     input:
-        lambda w: expand("normalized_movie/nuc/{RoiUID}.ome.tif",
+        lambda w: expand("results/image_normalized_nucleus/{RoiUID}.ome.tif",
                          RoiUID=get_checkpoint_RoiUID(w)),
-        lambda w: expand("normalized_movie/np/{RoiUID}.ome.tif",
+        lambda w: expand("results/image_normalized_nucleoplasm/{RoiUID}.ome.tif",
                          RoiUID=get_checkpoint_RoiUID(w)),
 
 
@@ -229,9 +221,9 @@ checkpoint crop_roi:
 
 rule split_channels:
     input:
-        "single_nuc_movie/{RoiUID}.ome.tif"
+        "results/image/multi_ch/{RoiUID}.ome.tif"
     output:
-        expand("single_nuc_movie/{ch}/{RoiUID}.ome.tif", 
+        expand("results/image/single_ch/{ch}/{RoiUID}.ome.tif", 
                ch=ALL_CH, allow_missing=True)
     resources:
         mem = 1000, 
@@ -243,11 +235,11 @@ rule split_channels:
 
 rule segment_nuclei_in_time:
     input:
-        expand("single_nuc_movie/{ch}/{RoiUID}.ome.tif",
+        expand("results/image/single_ch/{ch}/{RoiUID}.ome.tif",
                ch=config['segment_nuclei_in_time']['channel'],
                allow_missing=True)
     output:
-        "single_nuc_mask_movie/{RoiUID}.ome.tif"
+        "results/segmentation/nucleus/{RoiUID}.ome.tif"
     resources:
         mem = 2000, 
         time = 61, 
@@ -257,14 +249,14 @@ rule segment_nuclei_in_time:
 
 rule normalize_intensity:
     input:
-        image="single_nuc_movie/{RoiUID}.ome.tif",
-        mask="single_nuc_mask_movie/{RoiUID}.ome.tif",
+        image="results/image/multi_ch/{RoiUID}.ome.tif",
+        mask="results/segmentation/nucleus/{RoiUID}.ome.tif",
     output:
-        nuc="normalized_movie/nuc/{RoiUID}.ome.tif",
-        np="normalized_movie/np/{RoiUID}.ome.tif",
+        nuc="results/image_normalized_nucleus/{RoiUID}.ome.tif",
+        npl="results/image_normalized_nucleoplasm/{RoiUID}.ome.tif",
     params:
         chnames=ALL_CH,
-        outdir="normalized_movie/np",
+        outdir="results/image_normalized_nucleoplasm/",
         background=config['normalize_intensity']['background'],
     script:
         "scripts/normalize_intensity.py"

@@ -14,15 +14,13 @@ def main(input_path: str, output_paths: List[str], chinfo_dict=None) -> None:
         image = imageset.isel(C=idx).squeeze()
         OmeTiffWriter.save(image.data, output_paths[idx], dim_order="TYX")
 
-
-def extract_channel_info(pepfile_path: str, exptype: str) -> Dict:
+# TODO:
+#  - Don't actually need this. Just need to know the number of channels
+def extract_channel_info(channel_info_list) -> Dict:
     """
     From a pepfile, convert channel info from list of {k: v}'s to {key: list of v's}
     """
-    import yaml
-    with open(pepfile_path, 'rb') as f:
-        conf = yaml.load(f, Loader=yaml.CLoader)
-    channels = conf['experiments'][exptype]['channels']
+    channels = channel_info_list
     keys = channels[0].keys()
     return {
         key: [ch[key] for ch in channels]
@@ -33,8 +31,7 @@ def extract_channel_info(pepfile_path: str, exptype: str) -> Dict:
 if __name__ == '__main__':
     if 'snakemake' in globals():
         chinfo_dict = extract_channel_info(
-            snakemake.config['input']['pepfile_path'], 
-            snakemake.config['input']['experiment_type'])
+            snakemake.config['input']['channels'])
         main(snakemake.input[0], 
              snakemake.output, 
              chinfo_dict=chinfo_dict)

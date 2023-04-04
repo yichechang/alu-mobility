@@ -195,6 +195,8 @@ def compile_roilist(
     #
     df_rois.to_csv(output_path, quoting=2, index=False, header=True)
 
+# TODO:
+#   - can be written using pandas.DataFrame.from_records()
 def extract_channel_info(channel_info_list) -> Dict:
     """
     From a pepfile, convert channel info from list of {k: v}'s to {key: list of v's}
