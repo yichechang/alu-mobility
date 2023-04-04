@@ -57,7 +57,7 @@ def get_imageset_files(wildcards):
 #
 def get_checkpoint_RoiUID(wildcards):
     checkpoints.crop_roi.get(**wildcards)
-    return glob_wildcards("single_nuc_movie/{RoiUID, [\w-]+}.ome.tif").RoiUID
+    return glob_wildcards("results/image/multi_ch/{RoiUID, [\w-]+}.ome.tif").RoiUID
 
 
 # ======================================================================
@@ -73,7 +73,6 @@ localrules:
     all_split_channels,
     all_segment_nuclei,
     all_piv,
-    build_imagelist,
     draw_roi,
     crop_roi,
     split_channels,
@@ -106,7 +105,7 @@ rule all:
 
 rule all_crop_roi:
     input:
-        lambda w: expand("results/image/{RoiUID}.ome.tif", 
+        lambda w: expand("results/image/multi_ch/{RoiUID}.ome.tif", 
                          RoiUID=get_checkpoint_RoiUID(w))
 
 
