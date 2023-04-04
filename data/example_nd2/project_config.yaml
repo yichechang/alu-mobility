@@ -15,3 +15,6 @@ experiments:
       - oc: 488 nm
         fluoro: sfGFP
         colormap: green
+      - oc: 405 nm
+        fluoro: BFP
+        colormap: blue
