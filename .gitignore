@@ -133,5 +133,6 @@ dmypy.json
 # =================
 # data
 data/
+results/
 # snakemake
 .snakemake/

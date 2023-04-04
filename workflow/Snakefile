@@ -10,11 +10,6 @@ from pathlib import Path
 # via commandline option `--configfile <path/to/config.yaml>`.
 configfile: workflow.source_path('../config/config.yaml')
 
-# This is a separate configuration file that is specific to dataset
-# itself, and not to the workflow at all.
-#
-pepfile: config['input']['pepfile_path']
-
 
 # ======================================================================
 # wildcards
@@ -34,13 +29,24 @@ wildcard_constraints:
 
 
 def get_channel_names():
-    channels = (pep.config['experiments']
-                          [config['input']['experiment_type']]
-                          ['channels'])
-    return [c['fluoro'] for c in channels]
+    return [c['fluoro'] for c in config['input']['channels']]
 ALL_CH = get_channel_names()
 
 ALL_PROTOCOLS = ['matpiv_v2']
+
+def get_imageset_files(wildcards):
+    from abcdcs import curate
+    files = []
+    image_path = config['input']['image_path']
+    globbed = Path(image_path['dir']).rglob(image_path['glob'])
+    globbed_fpaths = [p for p in globbed if p.is_file()]
+    for p in globbed_fpaths:
+        if re.search(image_path['regex'], str(p)):
+            files.append(str(p))
+        else:
+            print(f"Excluding file globbed but cannot be parsed: "
+                  f"{str(p)}.")
+    return files
 
 # ======================================================================
 # get wildcards from checkpoint
@@ -97,6 +103,12 @@ rule all:
 #
 # after checkpoint crop_roi
 #
+
+rule all_crop_roi:
+    input:
+        lambda w: expand("results/image/{RoiUID}.ome.tif", 
+                         RoiUID=get_checkpoint_RoiUID(w))
+
 
 rule all_split_channels:
     input:
@@ -157,9 +169,9 @@ rule all_piv:
 
 rule draw_roi:
     input: 
-        'imagesetlist.csv',
+        'results/imagesetlist.csv',
     output:
-        'roilist.csv'
+        'results/roilist.csv'
     script:
         "scripts/draw_roi.py"
 
@@ -171,11 +183,25 @@ rule draw_roi:
 # before checkpoint crop_roi
 #
 
-rule build_imagelist:
+rule parse_metadata:
+    input:
+        get_imageset_files
     output: 
-        'imagesetlist.csv',
-    script:
-        "scripts/build_imagelist.py"
+        'results/imagesetlist.csv',
+    run:
+        from abcdcs import curate
+        import csv
+        parsed = curate.parse_filepaths(
+            fpaths=input, 
+            pat=config['input']['image_path']['regex'], 
+            datefmt=config['input']['datefmt'],
+            nafilter=config['parse_metadata']['nafilter'],
+            verbose=config['parse_metadata']['verbose'],
+        )
+        samplesheet = curate.read_samplesheet(config['input']['samplesheet_path'])
+        merged = curate.merge_sample_metadata(
+            parsed, samplesheet, patch=config['parse_metadata']['patch'])
+        merged.to_csv(output[0], quoting=csv.QUOTE_NONNUMERIC, index=False)
 
 
 # Note:
@@ -183,13 +209,14 @@ rule build_imagelist:
 #   (specified same as params.outdir) ensures that folder gets created.
 #   This means that the script doesn't need to check/create by itself.
 #   We also don't need to explicitly do mkdir before calling the script.
+#   See [why this is intended](https://github.com/snakemake/snakemake/issues/774#issuecomment-1036152852)
 checkpoint crop_roi:
     input:
-        'roilist.csv'
+        'results/roilist.csv'
     output:
-        touch("single_nuc_movie/.done")
+        touch("results/image/multi_ch/.created")
     params:
-        outdir = "single_nuc_movie"
+        outdir = "results/image/multi_ch"
     resources:
         mem = 1000, 
         time = 30, 

@@ -195,14 +195,11 @@ def compile_roilist(
     #
     df_rois.to_csv(output_path, quoting=2, index=False, header=True)
 
-def extract_channel_info(pepfile_path: str, exptype: str) -> Dict:
+def extract_channel_info(channel_info_list) -> Dict:
     """
     From a pepfile, convert channel info from list of {k: v}'s to {key: list of v's}
     """
-    import yaml
-    with open(pepfile_path, 'rb') as f:
-        conf = yaml.load(f, Loader=yaml.CLoader)
-    channels = conf['experiments'][exptype]['channels']
+    channels = channel_info_list
     keys = channels[0].keys()
     return {
         key: [ch[key] for ch in channels]
@@ -241,8 +238,8 @@ def main(imagesetlist_path: str, output_path: str, chinfo_dict=None
 if __name__ == '__main__':
     if 'snakemake' in globals():
         chinfo_dict = extract_channel_info(
-            snakemake.config['input']['pepfile_path'], 
-            snakemake.config['input']['experiment_type'])
+            snakemake.config['input']['channels'])
+        
         main(snakemake.input[0], 
              snakemake.output[0], 
              chinfo_dict=chinfo_dict)

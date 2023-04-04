@@ -8,16 +8,37 @@
 # characters are used. More importantly, even if they are quoted here,
 # they still need to be quoted again when used in the "shell" derivative.
 input:
-  pepfile_path: /tigress/yichec/data/microscopy/2023a/test-snakemake/project_config.yaml
-  samplesheet_path: /tigress/yichec/data/microscopy/2023a/test-snakemake/samplesheet.csv
-  experiment_type: movie
-  raw:
-    base_dir: /tigress/yichec/data/
-    # write in one line, with single quotes, and write \/ for forward
-    # slash, write \ for backslash
-    common_pattern: 'microscopy\/\d{4}[a-d]\/.*'
-    subdir_name: test-snakemake
-    ext: nd2
+  pepfile_path: /Users/yi-che/repository/phd-analysis/abc-mobility/data/example_nd2/project_config.yaml
+  samplesheet_path: /Users/yi-che/repository/phd-analysis/abc-mobility/data/example_nd2/samplesheet.csv
+  # experiment_type: movie
+  # raw:
+  #   base_dir: /tigress/yichec/data/
+  #   # write in one line, with single quotes, and write \/ for forward
+  #   # slash, write \ for backslash
+  #   common_pattern: 'microscopy\/\d{4}[a-d]\/.*'
+  #   subdir_name: test-snakemake
+  #   ext: nd2
+  image_path:
+    dir: /Users/yi-che/repository/phd-analysis/abc-mobility/data/example_nd2
+    glob: '*.nd2'
+    regex: 'Well(?P<WellID>[A-H]\d{2})_Fov(?P<FovID>\d{3}).nd2'
+  datefmt: "%y%m%d"
+  channels: 
+    - oc: 640 nm
+      fluoro: miRFP670
+      colormap: magenta 
+    - oc: 488 nm
+      fluoro: sfGFP
+      colormap: green
+    - oc: 405 nm
+      fluoro: BFP
+      colormap: blue
+
+parse_metadata:
+  nafilter: strict
+  verbose: True
+  patch: True
+
 
 build_imagelist:
   nafilter: strict
