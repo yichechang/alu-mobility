@@ -13,26 +13,27 @@ import typer
 
 def main(
         roilist_path: str, 
-        common_pattern: str, platform_prefix: str,
+        # common_pattern: str, platform_prefix: str,
         output_dir: str
     ) -> None:
     df = pd.read_csv(roilist_path)
     crop_func = partial(crop_rois_from_a_file, 
-                        common_pattern=common_pattern,
-                        platform_prefix=platform_prefix,
+                        # common_pattern=common_pattern,
+                        # platform_prefix=platform_prefix,
                         output_dir=output_dir)
     df.groupby('ImagesetUID').apply(crop_func)
 
 
 def crop_rois_from_a_file(
         df: pd.DataFrame, *, 
-        common_pattern: str, platform_prefix: str, 
+        # common_pattern: str, platform_prefix: str, 
         output_dir: str
     ) -> None:
     # open the image (all rois are from the same image)
-    im_path_original = df["ImagesetFilepath"].iloc[0]
-    im_path = update_absolute_path(im_path_original, 
-                                   common_pattern, platform_prefix)
+    im_path = df["ImagesetFilepath"].iloc[0]
+    # im_path_original = df["ImagesetFilepath"].iloc[0]
+    # im_path = update_absolute_path(im_path_original, 
+    #                                common_pattern, platform_prefix)
     im = AICSImage(im_path)
 
     roi_records = df.to_dict('records')
@@ -91,8 +92,8 @@ def update_absolute_path(
 if __name__ == '__main__':
     if 'snakemake' in globals():
         main(snakemake.input[0], 
-             snakemake.config['input']['raw']['common_pattern'],
-             snakemake.config['input']['raw']['base_dir'],
+            #  snakemake.config['input']['raw']['common_pattern'],
+            #  snakemake.config['input']['raw']['base_dir'],
              snakemake.params['outdir'])
     else:
         typer.run(main)
