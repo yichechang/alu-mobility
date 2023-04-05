@@ -51,6 +51,11 @@ segment_nuclei_in_time:
 normalize_intensity:
   background: 400
 
+
+predict_nucleoli:
+  channel: BFP
+  model_name: u2os_nucleoli_bfp_v1
+
 piv:
   pkg_path: "external/MatPIV-1.7"
   channel: 
@@ -78,6 +83,11 @@ piv:
 msnd:
   channel: miRFP670
   weight_channel: sfGFP
+
+resources:
+  classifiers:
+    u2os_nucleoli_bfp_v1:
+      url: 'https://www.dropbox.com/s/ryoma1qvklinxn6/u2os_nucleoli_bfp_v1.ilp?dl=1'
 
 # ======================================================================
 #

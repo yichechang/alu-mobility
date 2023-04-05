@@ -80,18 +80,29 @@ localrules:
 
 
 # -------------------------------------
+# rules that require internet access
+# -------------------------------------
+include: "rules/resources.smk"
+
+
+# -------------------------------------
 # the default target rule
 # -------------------------------------
 rule all:
     input:
         ".all_piv",
         ".all_segment_nuclei",
+    default_target: True
 
 
 # -------------------------------------
 # other "all" rules to request all outputs from certain rules
 # these are convenient especially for rules depending on checkpoint
 # -------------------------------------
+
+rule all_resources:
+    input:
+        all_resources_input
 
 #
 # before checkpoint crop_roi
@@ -260,6 +271,9 @@ rule normalize_intensity:
         background=config['normalize_intensity']['background'],
     script:
         "scripts/normalize_intensity.py"
+
+
+include: "rules/segmentation.smk"
 
 
 rule gen_piv_config_json:

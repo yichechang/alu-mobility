@@ -1,10 +1,10 @@
 '''
 image operations
 '''
-from typing import List, Union
+from typing import List, Union, Callable
 import numpy as np
 import xarray as xr
-from skimage.morphology import erosion, square
+from skimage.morphology import disk, binary_dilation, binary_erosion
 from aicsimageio import AICSImage
 
 
@@ -256,19 +256,19 @@ class Mask:
         return reader.read(fpath, fmt, drop_single_C=drop_single_C)
 
 
-    # TODO:
-    #   make structural element an argument
     @staticmethod
-    def shrink_mask(mask, r: int) -> xr.DataArray:
-        eroded = xr.apply_ufunc(
-                erosion,
-                mask,
-                input_core_dims=[['Y', 'X']],
-                output_core_dims=[['Y', 'X']],
-                vectorize=True,
-                kwargs={'footprint': square(r)}
-            )
-        return eroded
+    def erode_by_disk(mask: Union[xr.DataArray, xr.Dataset], 
+                      radius: int
+    ) -> Union[xr.DataArray, xr.Dataset]:
+        return _apply_ufunc_simple_by_plane(binary_erosion, mask, 
+                                            footprint=disk(radius))
+    
+    @staticmethod
+    def dilate_by_disk(mask: Union[xr.DataArray, xr.Dataset], 
+                       radius: int
+    ) -> Union[xr.DataArray, xr.Dataset]:
+        return _apply_ufunc_simple_by_plane(binary_dilation, mask, 
+                                            footprint=disk(radius))
 
 
 class MaskReader(ImageReader):
@@ -301,3 +301,30 @@ class MaskReader(ImageReader):
                 im = im.drop_vars('C')
 
         return im
+
+def _apply_ufunc_simple_by_plane(
+    f: Callable[[Union[xr.DataArray, xr.Dataset]], 
+                Union[xr.DataArray, xr.Dataset]],
+    data: Union[xr.DataArray, xr.Dataset], 
+    **kwargs
+) -> Union[xr.DataArray, xr.Dataset]:
+    """Wrapper for applying a function to each XY-plane.
+
+    This is a wrapper for xarray.apply_ufunc with some assumptions and
+    defaults that are useful for applying a function to every XY-plane.
+    The function f takes a 2D array as its first argument, and does not
+    require another DataArray or Dataset as its second argument. It can
+    take other arguments to be passed in as kwargs. 
+
+    Returns
+    -------
+    xr.DataArray
+    """
+    return xr.apply_ufunc(
+        f,
+        data,
+        input_core_dims=[['Y', 'X']],
+        output_core_dims=[['Y', 'X']],
+        vectorize=True,
+        kwargs=kwargs,
+    )
