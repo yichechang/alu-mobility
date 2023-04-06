@@ -1,15 +1,9 @@
 """
-Segmenting nucleoli and nucleoplasm.
-
-
-Inputs
-------
-- nucleus segmentation from cellpose (original)
-- ilastik model for predicting nucleoli using BFP grayscale image
-
+Segmenting nucleus, nucleoli and nucleoplasm.
 
 Outputs
 -------
+- nucleus segmentation from cellpose (original)
 - nucleoli segmentation (shrunken, more conservative)
 - nucleoplasm segmentation (shrunken, more conservative)
        
@@ -23,21 +17,27 @@ add any complexity yet (maybe something to solve if relying on OME
 metadata).
 """
 
-
-rule all_segment_nucleoli:
+rule segment_nuclei_in_time:
     input:
-        lambda w: expand("results/segmentation/{structure}/{roiuid}.ome.tif",
-                         structure=['nucleoli', 'nucleoplasm'],
-                         roiuid=get_checkpoint_RoiUID(w)),
+        expand("results/image/single_ch/{ch}/{RoiUID}.ome.tif",
+               ch=config['segment_nuclei_in_time']['channel'],
+               allow_missing=True)
+    output:
+        "results/segmentation/nucleus/{RoiUID}.ome.tif"
+    resources:
+        mem = 2000, 
+        time = 61, 
+    script:
+        "../scripts/segment_nuclei_in_time.py"
 
 
 rule mask_nuclear_image_for_ilastik:
     input:
-        image="results/image/multi_ch/{roiuid}.ome.tif",
-        mask="results/segmentation/nucleus/{roiuid}.ome.tif",
+        image="results/image/multi_ch/{RoiUID}.ome.tif",
+        mask="results/segmentation/nucleus/{RoiUID}.ome.tif",
     output:
-        multi="results/tmp/image_masked/nucleus/multichannel/{roiuid}.tif",
-        split=expand("results/tmp/image_masked/nucleus/split/{ch}/{roiuid}.tif",
+        multi="results/tmp/image_masked/nucleus/multichannel/{RoiUID}.tif",
+        split=expand("results/tmp/image_masked/nucleus/split/{ch}/{RoiUID}.tif",
                      ch=ALL_CH, allow_missing=True)
     run:
         import numpy as np
@@ -73,13 +73,13 @@ rule predict_nucleoli:
           0's outside of the nucleus (now 3 classes required)
     """
     input:
-        images=expand("results/tmp/image_masked/nucleus/split/{ch}/{roiuid}.tif",
+        images=expand("results/tmp/image_masked/nucleus/split/{ch}/{RoiUID}.tif",
                       ch=config['predict_nucleoli']['channel'],
                       allow_missing=True),
         model="resources/ilastik/{model_name}.ilp".format(
               model_name=config['predict_nucleoli']['model_name'])
     output:
-        expand("results/tmp/segmentation/nucleoli/{roiuid}.tiff",
+        expand("results/tmp/segmentation/nucleoli/{RoiUID}.tiff",
                allow_missing=True)
     params:
         # ilp=ILASTIK_PROJ,
@@ -103,9 +103,9 @@ rule convert_tiff_to_ometif:
     Standardize output format, because ilastik provides limited options.
     """
     input:
-        "results/tmp/segmentation/nucleoli/{roiuid}.tiff"
+        "results/tmp/segmentation/nucleoli/{RoiUID}.tiff"
     output:
-        "results/segmentation/nucleoli/{roiuid}.ome.tif"
+        "results/segmentation/nucleoli/{RoiUID}.ome.tif"
     run:
         from aicsimageio.writers.ome_tiff_writer import OmeTiffWriter
         from abcdcs import imageop
@@ -116,10 +116,10 @@ rule convert_tiff_to_ometif:
 
 rule segment_nucleoplasm:
     input:
-        nuc="results/segmentation/nucleus/{roiuid}.ome.tif",
-        no="results/segmentation/nucleoli/{roiuid}.ome.tif", 
+        nuc="results/segmentation/nucleus/{RoiUID}.ome.tif",
+        no="results/segmentation/nucleoli/{RoiUID}.ome.tif", 
     output: 
-        npl="results/segmentation/nucleoplasm/{roiuid}.ome.tif"
+        npl="results/segmentation/nucleoplasm/{RoiUID}.ome.tif"
     run:
         import numpy as np
         from aicsimageio.writers.ome_tiff_writer import OmeTiffWriter
@@ -133,3 +133,10 @@ rule segment_nucleoplasm:
         npl = imageop.Image.mask_to_keep(nuc_eroded, no_dilated==0)
         npl = npl.rename("nucleoplasm").astype(np.uint8)
         OmeTiffWriter.save(npl.data, output.npl, dim_order="TYX")
+
+
+all_segmentation_input = [
+    lambda w: expand("results/segmentation/{structure}/{RoiUID}.ome.tif",
+                     structure=['nucleus', 'nucleoli', 'nucleoplasm'],
+                     RoiUID=get_checkpoint_RoiUID(w)),
+]

@@ -11,53 +11,6 @@ from pathlib import Path
 configfile: workflow.source_path('../config/config.yaml')
 
 
-# ======================================================================
-# wildcards
-# ======================================================================
-
-# Exclude forward slash in wildcards matching.
-# (0) via setting allowed classes of characters
-# (1) it's critical to set these regex constrains, to reduce chance of 
-#     bad parsing for "ch1/UID1.ome.tif" with pattern 
-#     "{ch}/{RoiUID}.ome.tif" to yield wildcard RoiUID = "ch1/UID1"
-# (2) this should work globally, EXCEPT FOR inside an glob_wildcards() 
-#     call where you need to specify manually! See [related issue](https://github.com/snakemake/snakemake/issues/1726) 
-wildcard_constraints:
-    RoiUID = "[\w-]+",
-    ch = "[\w-]+",
-    protocol = "[\w-]+",
-
-
-def get_channel_names():
-    return [c['fluoro'] for c in config['input']['channels']]
-ALL_CH = get_channel_names()
-
-ALL_PROTOCOLS = ['matpiv_v2']
-
-def get_imageset_files(wildcards):
-    from abcdcs import curate
-    files = []
-    image_path = config['input']['image_path']
-    globbed = Path(image_path['dir']).rglob(image_path['glob'])
-    globbed_fpaths = [p for p in globbed if p.is_file()]
-    for p in globbed_fpaths:
-        if re.search(image_path['regex'], str(p)):
-            files.append(str(p))
-        else:
-            print(f"Excluding file globbed but cannot be parsed: "
-                  f"{str(p)}.")
-    return files
-
-# ======================================================================
-# get wildcards from checkpoint
-# ======================================================================
-
-#
-# This can be used inside an input function, to get {RoiUID}.
-#
-def get_checkpoint_RoiUID(wildcards):
-    checkpoints.crop_roi.get(**wildcards)
-    return glob_wildcards("results/image/multi_ch/{RoiUID, [\w-]+}.ome.tif").RoiUID
 
 
 # ======================================================================
@@ -79,10 +32,13 @@ localrules:
     gen_piv_config_json,
 
 
-# -------------------------------------
-# rules that require internet access
-# -------------------------------------
+
+include: "rules/common.smk"
 include: "rules/resources.smk"
+include: "rules/roi.smk"
+include: "rules/segmentation.smk"
+include: "rules/piv.smk"
+include: "rules/normalize_and_msnd.smk"
 
 
 # -------------------------------------
@@ -96,238 +52,28 @@ rule all:
 
 
 # -------------------------------------
-# other "all" rules to request all outputs from certain rules
-# these are convenient especially for rules depending on checkpoint
+# rules that require internet access
 # -------------------------------------
-
 rule all_resources:
     input:
         all_resources_input
 
-#
-# before checkpoint crop_roi
-#
 
-# none
-
-#
-# after checkpoint crop_roi
-#
-
-rule all_crop_roi:
+# -------------------------------------
+# other "all" rules for target
+# -------------------------------------
+rule all_roi:
     input:
-        lambda w: expand("results/image/multi_ch/{RoiUID}.ome.tif", 
-                         RoiUID=get_checkpoint_RoiUID(w))
+        all_roi_input
 
-
-rule all_split_channels:
+rule all_segmentation:
     input:
-        lambda w: expand("single_nuc_movie/{ch}/{RoiUID}.ome.tif", 
-                         ch=ALL_CH, 
-                         RoiUID=get_checkpoint_RoiUID(w))
-
-
-rule all_segment_nuclei:
-    input:
-        lambda w: expand("results/segmentation/nucleus/{RoiUID}.ome.tif", 
-                         RoiUID=get_checkpoint_RoiUID(w))
-
-
-rule all_normalize_intensity:
-    input:
-        lambda w: expand("results/image_normalized_nucleus/{RoiUID}.ome.tif",
-                         RoiUID=get_checkpoint_RoiUID(w)),
-        lambda w: expand("results/image_normalized_nucleoplasm/{RoiUID}.ome.tif",
-                         RoiUID=get_checkpoint_RoiUID(w)),
-
-
-rule all_msnd:
-    input:
-        lambda w: expand("msnd/{protocol}/{mode}/{RoiUID}_stats.csv",
-                         protocol=ALL_PROTOCOLS,
-                         mode=['normal', 'weighted'],
-                         RoiUID=get_checkpoint_RoiUID(w)),
-
+        all_segmentation_input
 
 rule all_piv:
     input:
-        lambda w: expand("piv/{protocol}/{ch}/{RoiUID}.mat",
-                         protocol=config['piv']['protocol'],
-                         ch=config['piv']['channel'],
-                         RoiUID=get_checkpoint_RoiUID(w))
-    output:
-        ".all_piv"
-    shell:
-        "touch {output}"
+        all_piv_input
 
-
-# -------------------------------------
-# other rules for target
-# -------------------------------------
-
-#
-# before checkpoint crop_roi
-#
-
-rule draw_roi:
-    input: 
-        'results/imagesetlist.csv',
-    output:
-        'results/roilist.csv'
-    script:
-        "scripts/draw_roi.py"
-
-# -------------------------------------
-# the rest of other rules
-# -------------------------------------
-
-#
-# before checkpoint crop_roi
-#
-
-rule parse_metadata:
+rule all_normalize_and_msnd:
     input:
-        get_imageset_files
-    output: 
-        'results/imagesetlist.csv',
-    run:
-        from abcdcs import curate
-        import csv
-        parsed = curate.parse_filepaths(
-            fpaths=input, 
-            pat=config['input']['image_path']['regex'], 
-            datefmt=config['input']['datefmt'],
-            nafilter=config['parse_metadata']['nafilter'],
-            verbose=config['parse_metadata']['verbose'],
-        )
-        samplesheet = curate.read_samplesheet(config['input']['samplesheet_path'])
-        merged = curate.merge_sample_metadata(
-            parsed, samplesheet, patch=config['parse_metadata']['patch'])
-        merged.to_csv(output[0], quoting=csv.QUOTE_NONNUMERIC, index=False)
-
-
-# Note:
-#   Defining output by touching a file inside the desired output folder
-#   (specified same as params.outdir) ensures that folder gets created.
-#   This means that the script doesn't need to check/create by itself.
-#   We also don't need to explicitly do mkdir before calling the script.
-#   See [why this is intended](https://github.com/snakemake/snakemake/issues/774#issuecomment-1036152852)
-checkpoint crop_roi:
-    input:
-        'results/roilist.csv'
-    output:
-        touch("results/image/multi_ch/.created")
-    params:
-        outdir = "results/image/multi_ch"
-    resources:
-        mem = 1000, 
-        time = 30, 
-        short_jobs = 1, # <61 minutes
-    script:
-        "scripts/crop_roi.py"
-
-#
-# after checkpoint crop_roi
-#
-
-rule split_channels:
-    input:
-        "results/image/multi_ch/{RoiUID}.ome.tif"
-    output:
-        expand("results/image/single_ch/{ch}/{RoiUID}.ome.tif", 
-               ch=ALL_CH, allow_missing=True)
-    resources:
-        mem = 1000, 
-        time = 30, 
-        short_jobs = 1, # <61 minutes
-    script:
-        "scripts/split_channels.py"
-
-
-rule segment_nuclei_in_time:
-    input:
-        expand("results/image/single_ch/{ch}/{RoiUID}.ome.tif",
-               ch=config['segment_nuclei_in_time']['channel'],
-               allow_missing=True)
-    output:
-        "results/segmentation/nucleus/{RoiUID}.ome.tif"
-    resources:
-        mem = 2000, 
-        time = 61, 
-    script:
-        "scripts/segment_nuclei_in_time.py"
-
-
-rule normalize_intensity:
-    input:
-        image="results/image/multi_ch/{RoiUID}.ome.tif",
-        mask="results/segmentation/nucleus/{RoiUID}.ome.tif",
-    output:
-        nuc="results/image_normalized_nucleus/{RoiUID}.ome.tif",
-        npl="results/image_normalized_nucleoplasm/{RoiUID}.ome.tif",
-    params:
-        chnames=ALL_CH,
-        outdir="results/image_normalized_nucleoplasm/",
-        background=config['normalize_intensity']['background'],
-    script:
-        "scripts/normalize_intensity.py"
-
-
-include: "rules/segmentation.smk"
-
-
-rule gen_piv_config_json:
-    output:
-        expand("{protocol}_config.json", 
-               protocol=config['piv']['protocol'])
-    params:
-        pivconfig = config['piv']['protocol_configs'][config['piv']['protocol']],
-        moviemeta = config['piv']['movie_meta'],
-    script:
-        "scripts/gen_piv_config_json.py"
-
-
-rule piv:
-    input:
-        pivconfig = expand("{protocol}_config.json", 
-                           protocol=config['piv']['protocol']),
-        movie = "single_nuc_movie/{ch}/{RoiUID}.ome.tif"
-    output:
-        "piv/{protocol}/{ch}/{RoiUID}.mat"
-    params:
-        protocol = config['piv']['protocol'],
-        pivpkg = str(
-            Path(workflow.current_basedir) /
-            config['piv']['pkg_path']),
-        mfiledir = str(Path(workflow.current_basedir) / "scripts"),
-    threads: 1  # While our mfile can use more than one core, somehow
-                # snakemake doesn't play well with it and matlab will
-                # fail at starting its parpool. 
-    envmodules:
-        "matlab/R2019b"
-    resources:
-        mem = 2000, 
-        time = 61, 
-    shell:
-        # Note that in order for {input} {output} to still be relative
-        # to dir where Snakemake is invoked, we need to start matlab
-        # in the same directory (hence, `-sd <dir/to/launch>` doesn't 
-        # fit). 
-        """
-        matlab -batch "addpath('{params.mfiledir}', genpath('{params.pivpkg}')); {params.protocol}('{input.movie}', '{output}', '{input.pivconfig}', 1)"
-        """
-
-rule msnd:
-    input:
-        piv="piv/{protocol}/" + config['msnd']['channel'] + "/{RoiUID}.mat",
-        image="normalized_movie/np/{RoiUID}.ome.tif",
-        mask="single_nuc_mask_movie/{RoiUID}.ome.tif",
-    output:
-        normal="msnd/{protocol}/normal/{RoiUID}_stats.csv",
-        weighted="msnd/{protocol}/weighted/{RoiUID}_stats.csv",
-    params:
-        chnames=ALL_CH,
-        background=config['normalize_intensity']['background'],
-        outdir="msnd/",
-    script:
-        "scripts/weighted_msnd.py"
+        all_normalize_and_msnd_input
