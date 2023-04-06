@@ -23,6 +23,16 @@ mamba create -n abcd
 mamba env update -n abcd -f workflow/envs/abcd.yaml
 ```  
 
+### ilastik
+Install manually before the first run. 
+
+```
+mamba create -n ilastik --override-channels -c pytorch -c ilastik-forge -c conda-forge ilastik
+```
+
+**TODO**: add to conda environment for snakemake to create this on the 
+first run.
+
 ### MATLAB
 
 You'll need to have `matlab` on your path. This can either be done by 
@@ -32,32 +42,64 @@ the environment modules on a cluster (e.g. `module load matlab/R2019b`).
 
 ## Executing snakemake workflow
 
-For now, ROI annotation in the original image files can only be done
-locally and not on della. Make sure to at least run to `draw_roi` to 
-obtain `imagesetlist.csv` and `roilist.csv`, copy those two files to 
-HPC at `/scratch/gpfs/<user>/proj/alu/<analysis-name>/`, then run the
-rest of the pipeline on della.
-
 ### On local machine
-`cd` to analysis folder, and run snakemake locally, optionally specify 
-target rule `draw_roi` if just want to run up to that step, saving the 
-remaining to run on della. For example:
+1. `conda activate abcy_py38`
+2. `cd` to analysis folder
+3. copy [`config/config.yaml`](config/config.yaml) to analysis folder 
+   and modify according to the experiment
+4. Run snakemake locally, optionally specify target rule. (See 
+   [`Snakefile`](workflow/Snakefile) for possible *all*-type rules.)
 
 ```
 snakemake \
   -s ~/repository/phd-analysis/abc-mobility/workflow/Snakefile \
-  -c1 \
-  draw_roi
+  --configfile config.yaml \
+  --use-conda \
+  -c4
 ```
 
 ### On della
-`cd` to analysis folder, and run
+
+#### Part A: Set up analysis folder
+1. `cd` to analysis folder
+2. copy [`config/config.yaml`](config/config.yaml) to analysis folder 
+   and modify according to the experiment
+
+#### Part B: GUI-based work and resources download
+1. Launch `della-vis1` desktop via VNC on mydella.
+2. Launch terminal and `module load anaconda3/2022.10 && conda activate abcd`
+3. `cd` to analysis folder, and run
 
 ```
 snakemake \
   -s ~/abc-mobility/workflow/Snakefile \
-  --profile ~/abc-mobility/config/princeton_rc/
+  --configfile config.yaml \
+  --use-conda \
+  --use-envmodules \
+  -c1 \
+  all_interactive
 ```
+
+#### Part C: Run remaining rules on della using `salloc`
+1. `cd` to analysis folder
+2. `module load anaconda3/2022.10 && conda activate abcd`
+3. `salloc --nodes=1 --ntasks=<n> --mem-per-cpu=<m>G --time=<t>` where 
+   `<n>` is the number of cores to use, `<m>` is the amount of memory 
+   per core, and `<t>` is the time limit.
+4. Issue the following command:
+
+```
+snakemake \
+  -s ~/abc-mobility/workflow/Snakefile \
+  --configfile config.yaml \
+  --use-conda \
+  --use-envmodules \
+  -c<n> \
+  all && \
+scancel $SLURM_JOB_ID
+```
+
+where `<n>` is the core requested in the `salloc` command.
 
 
 ## Versions
@@ -76,6 +118,11 @@ single tagging system for version tracking.
 The format is `yyyy.MM.dd.[a-z]` where `[a-z]` is used to differentiate
 versions tagged on the same date.
 
+- `2023.04.05.a`: Consider this `v0.0.9`!
+    - include ilastik for nucleoli segmentation
+    - workflow is more modular with clearer main `Snakefile`
+    - directly determine raw input files to be used for rules
+    - no pepfile is used anymore. just a single config file.
 - `2023.03.31.a`: remove unused function in msnd
 - `2023.03.30.a`: **normalize intensity for y459 and y491 on della**
 - `2023.03.28.a`: **Improve raw data compatibility with tiff file without metadata**

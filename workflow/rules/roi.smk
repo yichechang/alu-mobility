@@ -63,6 +63,8 @@ rule split_channels:
         "../scripts/split_channels.py"
 
 
+all_draw_roi_input = 'results/roilist.csv'
+
 all_roi_input = [
     lambda w: expand("results/image/multi_ch/{RoiUID}.ome.tif", 
                      RoiUID=get_checkpoint_RoiUID(w)),

@@ -1,35 +1,11 @@
 from pathlib import Path
 
 
-# ======================================================================
-# configuration files
-# ======================================================================
 
 # Default to using the config file in the same respository as this 
 # Snakefile. Alternatively, you can specify a different config file
 # via commandline option `--configfile <path/to/config.yaml>`.
 configfile: workflow.source_path('../config/config.yaml')
-
-
-
-
-# ======================================================================
-# rules
-# ======================================================================
-
-
-#
-# these won't be submitted as jobs to the scheduler
-#
-localrules:
-    all,
-    all_split_channels,
-    all_segment_nuclei,
-    all_piv,
-    draw_roi,
-    crop_roi,
-    split_channels,
-    gen_piv_config_json,
 
 
 
@@ -41,39 +17,35 @@ include: "rules/piv.smk"
 include: "rules/normalize_and_msnd.smk"
 
 
+
+# -------------------------------------
+# rules that require internet access or GUI
+# -------------------------------------
+rule all_interactive:
+    input: [all_resources_input, all_draw_roi_input]
+
 # -------------------------------------
 # the default target rule
 # -------------------------------------
 rule all:
-    input:
-        ".all_piv",
-        ".all_segment_nuclei",
     default_target: True
-
-
-# -------------------------------------
-# rules that require internet access
-# -------------------------------------
-rule all_resources:
     input:
-        all_resources_input
-
+        [
+            all_roi_input,
+            all_piv_input,
+        ]
 
 # -------------------------------------
 # other "all" rules for target
 # -------------------------------------
 rule all_roi:
-    input:
-        all_roi_input
+    input: all_roi_input
 
 rule all_segmentation:
-    input:
-        all_segmentation_input
+    input: all_segmentation_input
 
 rule all_piv:
-    input:
-        all_piv_input
+    input: all_piv_input
 
 rule all_normalize_and_msnd:
-    input:
-        all_normalize_and_msnd_input
+    input: all_normalize_and_msnd_input

@@ -36,9 +36,11 @@ rule mask_nuclear_image_for_ilastik:
         image="results/image/multi_ch/{RoiUID}.ome.tif",
         mask="results/segmentation/nucleus/{RoiUID}.ome.tif",
     output:
-        multi="results/tmp/image_masked/nucleus/multichannel/{RoiUID}.tif",
-        split=expand("results/tmp/image_masked/nucleus/split/{ch}/{RoiUID}.tif",
-                     ch=ALL_CH, allow_missing=True)
+        multi=temp("results/tmp/image_masked/nucleus/multichannel/{RoiUID}.tif"),
+        split=temp(
+            expand("results/tmp/image_masked/nucleus/split/{ch}/{RoiUID}.tif",
+                   ch=ALL_CH, allow_missing=True)
+        )
     run:
         import numpy as np
         import tifffile
@@ -79,8 +81,10 @@ rule predict_nucleoli:
         model="resources/ilastik/{model_name}.ilp".format(
               model_name=config['predict_nucleoli']['model_name'])
     output:
-        expand("results/tmp/segmentation/nucleoli/{RoiUID}.tiff",
-               allow_missing=True)
+        temp(
+            expand("results/tmp/segmentation/nucleoli/{RoiUID}.tiff",
+                   allow_missing=True)
+        )
     params:
         # ilp=ILASTIK_PROJ,
         outdir="results/tmp/segmentation/nucleoli",
