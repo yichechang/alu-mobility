@@ -27,12 +27,14 @@ import typer
 
 model = models.Cellpose(model_type='nuclei')
 channels = [[0,0]]
-diameter = 100.
 
-def main(input_fpath: str, output_fpath: str, ch: int = 0):
+def main(input_fpath: str, 
+         output_fpath: str, 
+         diameter: int = None, 
+):
     
     # Segment one giant image instead of individual frames
-    tstack = AICSImage(input_fpath).xarray_data.isel(C=ch).squeeze()
+    tstack = AICSImage(input_fpath).xarray_data.isel(C=0).squeeze()
     montaged = montage(tstack, fill=0)
 
     # cellpose segment on montaged 2D image
@@ -63,6 +65,9 @@ def main(input_fpath: str, output_fpath: str, ch: int = 0):
 
 if __name__ == '__main__':
     if 'snakemake' in globals():
-        main(snakemake.input[0], snakemake.output[0])
+        main(snakemake.input[0], 
+             snakemake.output[0], 
+             snakemake.config['segment_nuclei_in_time']['diameter']
+        )
     else:
         typer.run(main)

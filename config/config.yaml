@@ -47,6 +47,8 @@ build_imagelist:
 
 segment_nuclei_in_time:
   channel: sfGFP
+  diameter: 100
+
 
 normalize_intensity:
   background: 400
