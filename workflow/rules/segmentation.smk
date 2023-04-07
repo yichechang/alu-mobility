@@ -139,6 +139,12 @@ rule segment_nucleoplasm:
         OmeTiffWriter.save(npl.data, output.npl, dim_order="TYX")
 
 
+all_segmentation_nucleus_input = (
+    lambda w: expand("results/segmentation/nucleus/{RoiUID}.ome.tif",
+                     RoiUID=get_checkpoint_RoiUID(w))
+)
+
+
 all_segmentation_input = [
     lambda w: expand("results/segmentation/{structure}/{RoiUID}.ome.tif",
                      structure=['nucleus', 'nucleoli', 'nucleoplasm'],

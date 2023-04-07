@@ -41,6 +41,9 @@ rule all:
 rule all_roi:
     input: all_roi_input
 
+rule all_segmentation_nucleus:
+    input: all_segmentation_nucleus_input
+
 rule all_segmentation:
     input: all_segmentation_input
 
