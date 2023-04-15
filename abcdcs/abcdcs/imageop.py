@@ -1,7 +1,8 @@
 '''
 image operations
 '''
-from typing import List, Union, Callable
+from functools import partial
+from typing import List, Tuple, Union, Callable
 import numpy as np
 import xarray as xr
 from skimage.morphology import disk, binary_dilation, binary_erosion
@@ -61,7 +62,7 @@ class Image:
 
         rescaled = xr.apply_ufunc(
             Normalize(method),
-            data,
+                data,
             input_core_dims=[['Y','X']],
             output_core_dims=[['Y','X']],
             kwargs={**kwargs},
@@ -69,6 +70,38 @@ class Image:
         )
         return rescaled
 
+    @staticmethod
+    def normalize_by(
+        data: Union[xr.Dataset, xr.DataArray], 
+        by: Union[xr.Dataset, xr.DataArray], 
+        method: str, **kwargs
+    ) -> Union[xr.Dataset, xr.DataArray]:
+        """
+        Rescale for 2D [+ T] [+ C] image `data` by another image `by`.
+
+        Similar to `Image.normalize` but uses a separate image to 
+        calculate how to rescale.
+
+        Parameters
+        ----------
+        data, by : xr.DataArray or xr.Dataset
+            Normalize data based on by. Both are of the same type and 
+            same dimentions.
+        method : str
+            Normalizing method. Choose from 'zscore' and 'pclip'
+        **kwargs: dict
+            passed as Normalize(method, **kwargs)
+        """
+        rescaled = xr.apply_ufunc(
+            lambda x, y: Normalize(method).get_func(y, **kwargs)(x),
+                data,
+                by,
+            input_core_dims=[['Y','X'], ['Y','X']],
+            output_core_dims=[['Y','X']],
+            vectorize=True
+        )
+        return rescaled
+    
     @staticmethod
     def mask_to_keep(data: Union[xr.Dataset, xr.DataArray], 
                      mask: xr.DataArray,
@@ -191,12 +224,29 @@ class Normalize:
                 f"Normalizing method `{method}` not supported.")
         elif method == 'pclip':
             self._rescale = self._pclip
+            self._get_params = self._pclip_params
         elif method == 'zscore':
             self._rescale = self._zscore
+            self._get_params = self._zscore_params
 
     def __call__(self, data: Union[xr.Dataset, xr.DataArray], **kwargs
     ) -> Union[xr.Dataset, xr.DataArray]:
         return self._rescale(data, **kwargs)
+    
+    def get_params(self, data: Union[xr.Dataset, xr.DataArray], **kwargs
+    ) -> Tuple[float, float]:
+        """
+        Return params A and B for transformation y = (data - A) / B.
+        """
+        return self._get_params(data, **kwargs)
+    
+    def get_func(self, data: Union[xr.Dataset, xr.DataArray],
+                           **kwargs) -> Callable:
+        """
+        Return transformation function y = (data - A) / B
+        """
+        A, B = self.get_params(data, **kwargs)
+        return lambda x: (x - A) / B
     
     @staticmethod
     def _zscore(data):
@@ -215,7 +265,20 @@ class Normalize:
         p = np.nanpercentile(data, p)
         q = np.nanpercentile(data, 100-p)
         return (data - p) / (q - p)
-
+    
+    @staticmethod
+    def _zscore_params(data):
+        A = np.nanmean(data)
+        B = np.nanstd(data)
+        return A, B
+    
+    @staticmethod
+    def _pclip_params(data, p: float = 2.0):
+        p = np.nanpercentile(data, p)
+        q = np.nanpercentile(data, 100-p)
+        A = p
+        B = q-p
+        return A, B
 
 class Mask:
 

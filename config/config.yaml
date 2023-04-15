@@ -8,31 +8,26 @@
 # characters are used. More importantly, even if they are quoted here,
 # they still need to be quoted again when used in the "shell" derivative.
 input:
-  pepfile_path: /Users/yi-che/repository/phd-analysis/abc-mobility/data/example_nd2/project_config.yaml
   samplesheet_path: /Users/yi-che/repository/phd-analysis/abc-mobility/data/example_nd2/samplesheet.csv
-  # experiment_type: movie
-  # raw:
-  #   base_dir: /tigress/yichec/data/
-  #   # write in one line, with single quotes, and write \/ for forward
-  #   # slash, write \ for backslash
-  #   common_pattern: 'microscopy\/\d{4}[a-d]\/.*'
-  #   subdir_name: test-snakemake
-  #   ext: nd2
   image_path:
     dir: /Users/yi-che/repository/phd-analysis/abc-mobility/data/example_nd2
     glob: '*.nd2'
     regex: 'Well(?P<WellID>[A-H]\d{2})_Fov(?P<FovID>\d{3}).nd2'
-  datefmt: "%y%m%d"
+  datefmt: 
   channels: 
     - oc: 640 nm
       fluoro: miRFP670
-      colormap: magenta 
+      colormap: magenta
+      background: 400 
     - oc: 488 nm
       fluoro: sfGFP
       colormap: green
+      background: 400
     - oc: 405 nm
       fluoro: BFP
       colormap: blue
+      background: 400
+  bitdepth: 16
 
 parse_metadata:
   nafilter: strict
@@ -48,6 +43,12 @@ build_imagelist:
 segment_nuclei_in_time:
   channel: sfGFP
   diameter: 100
+
+
+normalize:
+  method: zscore
+  # nested as dict. leave it empty if not needed
+  method_kwargs:
 
 
 normalize_intensity:
@@ -90,9 +91,3 @@ resources:
   classifiers:
     u2os_nucleoli_bfp_v1:
       url: 'https://www.dropbox.com/s/ryoma1qvklinxn6/u2os_nucleoli_bfp_v1.ilp?dl=1'
-
-# ======================================================================
-#
-# Platform-specific configurations
-#
-# ======================================================================

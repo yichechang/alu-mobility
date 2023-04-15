@@ -13,6 +13,7 @@ wildcard_constraints:
     RoiUID = "[\w-]+",
     ch = "[\w-]+",
     protocol = "[\w-]+",
+    structure = "[\w-]+",
 
 
 def get_channel_names():
