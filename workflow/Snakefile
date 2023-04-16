@@ -13,6 +13,7 @@ include: "rules/common.smk"
 include: "rules/resources.smk"
 include: "rules/roi.smk"
 include: "rules/segmentation.smk"
+include: "rules/measure.smk"
 include: "rules/normalize.smk"
 include: "rules/piv.smk"
 include: "rules/normalize_and_msnd.smk"
@@ -47,6 +48,9 @@ rule all_segmentation_nucleus:
 
 rule all_segmentation:
     input: all_segmentation_input
+
+rule all_measure:
+    input: all_measure_input
 
 rule all_normalize:
     input: all_normalize_input

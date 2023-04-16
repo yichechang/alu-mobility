@@ -1,6 +1,8 @@
 '''
 image operations
 '''
+from __future__ import annotations
+
 from functools import partial
 from typing import List, Tuple, Union, Callable
 import numpy as np
@@ -134,8 +136,10 @@ class ImageReader:
         Whether to rescale the image to [0, 1] (raw value minus 
         background, then devided by 2**bitdepth - 1). If False, the 
         image will be returned as is (background-subtracted).
-    background : float, optional
-        Background value to subtract from the image. Default is 0.
+    background : float or list of float, optional
+        Background value to subtract from the image. Default is 0. If 
+        a list is provided, the order is assumed to be the same as the
+        channel order in the image.
     dtype : np.dtype, optional
         Data type of the image. Default is np.float64.
     squeeze : bool, optional
@@ -147,7 +151,7 @@ class ImageReader:
         *, 
         bitdepth: int = None,
         rescale: bool = False,
-        background: float = 0,
+        background: float | list[float] = 0,
         dtype: np.dtype = np.float64,
         squeeze: bool = False,
     ) -> None :
@@ -193,13 +197,26 @@ class ImageReader:
 
     def _read(self, fpath: str) -> xr.DataArray:
 
-        # read image and subtract background
+        # read image
         im = AICSImage(fpath).xarray_data.astype(self._dtype)
-        im -= self._background
 
         # add channel names if specified
         if self._channel_names is not None:
             im = im.assign_coords({'C': self._channel_names})
+
+        # substract background
+        # If background is a list of scalar, assume its order is same as
+        # the channel order of the image. If a scalar is provided, it is
+        # used as background for every channel in the image.
+        # TODO: make background a dict to specify out of order
+        if (isinstance(self._background, list) and 
+            len(self._background)==im.sizes['C']
+           ):
+            background = xr.DataArray(self._background, 
+                                      [("C", im.coords["C"].data)])
+        elif np.isscalar(self._background):
+            background = self._background
+        im -= background
         
         # rescale to [0, 1] if specified
         if self._rescale:

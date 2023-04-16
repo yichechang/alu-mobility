@@ -15,10 +15,16 @@ wildcard_constraints:
     protocol = "[\w-]+",
     structure = "[\w-]+",
 
+def get_channel_info():
+    import pandas as pd
+    cinfo = pd.DataFrame.from_records(config['input']['channels'])
+    return cinfo.to_dict('list')
+CINFO = get_channel_info()
 
-def get_channel_names():
-    return [c['fluoro'] for c in config['input']['channels']]
-ALL_CH = get_channel_names()
+# def get_channel_names():
+#     return [c['fluoro'] for c in config['input']['channels']]
+# ALL_CH = get_channel_names()
+ALL_CH = CINFO['fluoro']
 
 # TODO: Move to config
 ALL_PROTOCOLS = ['matpiv_v2']

@@ -14,6 +14,7 @@ input:
     glob: '*.nd2'
     regex: 'Well(?P<WellID>[A-H]\d{2})_Fov(?P<FovID>\d{3}).nd2'
   datefmt: 
+  # channels has to be in the order as how they present in the raw file
   channels: 
     - oc: 640 nm
       fluoro: miRFP670
@@ -58,6 +59,11 @@ normalize_intensity:
 predict_nucleoli:
   channel: BFP
   model_name: u2os_nucleoli_bfp_v1
+
+measure:
+  structure:
+    - nucleus
+    # - nucleoplasm
 
 piv:
   pkg_path: "external/MatPIV-1.7"
