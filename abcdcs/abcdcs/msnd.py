@@ -107,7 +107,7 @@ class MSND:
             to this class.
         
         ### eachlevel
-        by : xr.DataArray
+        byimage : xr.DataArray
             Array used to group the displacement fields. Must only 
             dimensions that can be found from `data`.
         bins : int | nd.ndarray
