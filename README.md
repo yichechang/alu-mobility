@@ -45,9 +45,17 @@ the environment modules on a cluster (e.g. `module load matlab/R2019b`).
 ### On local machine
 1. `conda activate abcy_py38`
 2. `cd` to analysis folder
-3. copy [`config/config.yaml`](config/config.yaml) to analysis folder 
-   and modify according to the experiment
-4. Run snakemake locally, optionally specify target rule. (See 
+3. Issue the following command to initialize the workflow:
+   ```bash
+   snakemake \
+     -s ~/repository/phd-analysis/abc-mobility/workflow/Snakefile \
+     -c1 \
+     init
+   ```
+   This will copy the [`config/config.yaml`](config/config.yaml) to the 
+   analysis folder.
+4. Edit the config file according to the experiment.
+5. Run snakemake locally, optionally specify target rule. (See 
    [`Snakefile`](workflow/Snakefile) for possible *all*-type rules.)
 
 ```
@@ -62,8 +70,17 @@ snakemake \
 
 #### Part A: Set up analysis folder
 1. `cd` to analysis folder
-2. copy [`config/config.yaml`](config/config.yaml) to analysis folder 
-   and modify according to the experiment
+2. Activate `abcd` conda environment by issuing `conda activate abcd`
+3. Issue the following command to initialize the workflow:
+   ```bash
+   snakemake \
+     -s ~/abc-mobility/workflow/Snakefile \
+     -c1 \
+     init
+   ```
+   This will copy the [`config/config.yaml`](config/config.yaml) to the 
+   analysis folder.
+4. Edit the config file according to the experiment.
 
 #### Part B: GUI-based work and resources download
 1. Launch `della-vis1` desktop via VNC on mydella.
