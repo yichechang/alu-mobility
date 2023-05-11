@@ -1,7 +1,3 @@
-from pathlib import Path
-
-
-
 # Default to using the config file in the same respository as this 
 # Snakefile. Alternatively, you can specify a different config file
 # via commandline option `--configfile <path/to/config.yaml>`.
@@ -9,6 +5,7 @@ configfile: workflow.source_path('../config/config.yaml')
 
 
 
+include: "rules/init.smk"
 include: "rules/common.smk"
 include: "rules/resources.smk"
 include: "rules/roi.smk"
@@ -19,6 +16,11 @@ include: "rules/piv.smk"
 include: "rules/normalize_and_msnd.smk"
 
 
+# -------------------------------------
+# initialize the config file
+# -------------------------------------
+rule init:
+    input: all_init_input
 
 # -------------------------------------
 # rules that require internet access or GUI

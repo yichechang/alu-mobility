@@ -1,3 +1,5 @@
+from pathlib import Path
+
 rule gen_piv_config_json:
     output:
         temp(
