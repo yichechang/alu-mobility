@@ -1,4 +1,4 @@
-rule normalize:
+rule normalize_singlechannel:
     input:
         image="results/image/single_ch/{ch}/{RoiUID}.ome.tif",
         mask="results/segmentation/{structure}/{RoiUID}.ome.tif",
@@ -37,11 +37,44 @@ rule normalize:
             image, masked, params.method, **method_kwargs)
         OmeTiffWriter.save(normalized.data, output.image)
 
-all_normalize_input = (
+
+rule normalize_multichannel:
+    input:
+        expand(
+            "results/image_normalized/by_{structure}/single_ch/{ch}/{RoiUID}.ome.tif",
+            ch=ALL_CH,
+            allow_missing=True
+        )
+    output:
+        merged="results/image_normalized/by_{structure}/multi_ch/{RoiUID}.ome.tif"
+    params:
+        cinfo=CINFO
+    run:
+        import xarray as xr
+        from aicsimageio.writers.ome_tiff_writer import OmeTiffWriter
+        from abcdcs import imageop 
+        images = []
+        for p, c in zip(input, params.cinfo['fluoro']):
+            image = imageop.Image.read(
+                p,
+                fmt='DataArray',
+                channel_names=[c],
+            )
+            images.append(image)
+        merged = xr.concat(images, dim='C')
+        OmeTiffWriter.save(merged.data, output.merged)
+
+all_normalize_input = [
     lambda w: expand(
         "results/image_normalized/by_{structure}/single_ch/{ch}/{RoiUID}.ome.tif",
-        structure=['nucleus'], ch=ALL_CH,
+        structure=config['normalize']['structure'], ch=ALL_CH,
+        RoiUID=get_checkpoint_RoiUID(w),
+    ),
+
+    lambda w: expand(
+        "results/image_normalized/by_{structure}/multi_ch/{RoiUID}.ome.tif",
+        structure=config['normalize']['structure'],
         RoiUID=get_checkpoint_RoiUID(w),
     )
-)
+]
         

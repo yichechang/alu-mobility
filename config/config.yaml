@@ -47,6 +47,9 @@ segment_nuclei_in_time:
 
 
 normalize:
+  structure:
+    - nucleus
+    - nucleoplasm
   method: zscore
   # nested as dict. leave it empty if not needed
   method_kwargs:
