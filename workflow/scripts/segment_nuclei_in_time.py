@@ -19,7 +19,9 @@ import numpy as np
 from aicsimageio import AICSImage
 from aicsimageio.writers import OmeTiffWriter
 from skimage.util import montage, view_as_blocks
+from skimage.transform import rescale, resize
 from skimage.morphology import remove_small_objects
+from skimage.filters import gaussian
 
 from cellpose import models
 
@@ -31,10 +33,24 @@ channels = [[0,0]]
 def main(input_fpath: str, 
          output_fpath: str, 
          diameter: int = None, 
+         downsample: int = None,
 ):
     
+    original = AICSImage(input_fpath).xarray_data.isel(C=0).squeeze()
+
+    # adjust bleaching
+    avg = original.mean(dim=['X', 'Y'])
+    original = original / avg
+
+    # downsample if specified
+    if downsample is not None:
+        tstack = rescale(original, 1 / downsample,
+                         order=0, preserve_range=True)
+        diameter = diameter / downsample
+    else:
+        tstack = original
+
     # Segment one giant image instead of individual frames
-    tstack = AICSImage(input_fpath).xarray_data.isel(C=0).squeeze()
     montaged = montage(tstack, fill=0)
 
     # cellpose segment on montaged 2D image
@@ -57,6 +73,16 @@ def main(input_fpath: str,
     mask_tstack[mask_tstack > 0] = 1
     mask_tstack = mask_tstack[0:tstack.shape[0]]
 
+    # upsample if needed
+    if downsample is not None:
+        mask_tstack = resize(
+            mask_tstack, original.shape,
+            order=1, preserve_range=True, 
+            anti_aliasing=True, anti_aliasing_sigma=1, 
+        )
+        mask_tstack[mask_tstack > 0.5] = 1
+        mask_tstack[mask_tstack < 1] = 0
+
     # save segmentation result to disk
     Path(output_fpath).parent.mkdir(parents=True, exist_ok=True)
     OmeTiffWriter.save(mask_tstack, output_fpath, dim_order="TYX",)
@@ -67,7 +93,8 @@ if __name__ == '__main__':
     if 'snakemake' in globals():
         main(snakemake.input[0], 
              snakemake.output[0], 
-             snakemake.config['segment_nuclei_in_time']['diameter']
+             snakemake.config['segment_nuclei_in_time']['diameter'],
+             snakemake.config['segment_nuclei_in_time']['downsample'],
         )
     else:
         typer.run(main)
