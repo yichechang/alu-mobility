@@ -2,10 +2,8 @@ from pathlib import Path
 
 rule gen_piv_config_json:
     output:
-        temp(
-            expand("{protocol}_config.json", 
-                   protocol=config['piv']['protocol'])
-        )
+        expand("{protocol}_config.json", 
+               protocol=config['piv']['protocol'])
     params:
         pivconfig = config['piv']['protocol_configs'][config['piv']['protocol']],
         moviemeta = config['piv']['movie_meta'],
