@@ -113,10 +113,15 @@ def global_filter(
     piv: xr.Dataset,
     *,
     components: list[str, str],
-    sigma: float = 3
+    sigma: float | None = None,
+    max: float | None = None,
 ) -> xr.Dataset:
     d = _compute_r(piv, components=components)
-    return piv.where(d <= d.mean() + sigma * d.std())
+    if sigma is not None:
+        filtered = piv.where(d <= d.mean() + sigma * d.std())
+    if max is not None:
+        filtered = piv.where(d <= max)
+    return filtered
 
 def mask_filter(
     piv: xr.Dataset,

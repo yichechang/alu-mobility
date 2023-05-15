@@ -10,6 +10,7 @@ import pandas as pd
 import xarray as xr
 import seaborn as sns
 import matplotlib.pyplot as plt
+import scipy.stats as ss
 
 
 class MSND:
@@ -87,7 +88,7 @@ class MSND:
         ----------
         method : str, default = 'normal'
             Method used to calculate MSND. Must be one of 'normal',
-            'weighted', 'eachlevel'.
+            'weighted', 'eachlevel', or 'eachlevel2d'.
         **kwargs
             Additional keyword arguments passed to the method specified
             in `method`.
@@ -113,14 +114,20 @@ class MSND:
         bins : int | nd.ndarray
             Bins to be passed to `np.digitize`.
 
+        ### eachlevel2d
+        byimage : xr.DataArray (coords has 'C' with two values)
+        bins : nd.ndarray
+            Bin edges.
+
             
         Returns
         -------
         stats : pd.DataFrame
             MSND statistics. The columns are 'lag', 'lag_s', 'mean',
             'std', 'sem', 'sizeT'. MSND quantities have unit in micron 
-            squared. Additional column 'level' is added if 
-            `method = 'eachlevel'`.
+            squared. Additional columns 'level' is added if 
+            `method = 'eachlevel'`, and two image channel names if 
+            `method = 'eachlevel2d'`.
         raw : pd.DataFrame
             MSND calculated from individual PIV displacement fields. The
             columns are 'lag', 'lag_s', 'T', 'T_s', 'msnd'. Additional 
@@ -150,6 +157,17 @@ class MSND:
             
         # calculate statistics
         stats = self._calculate_stats(df)
+
+        # TODO: use image arg info for making colnames at dispatch time
+        #
+        # update colnames dynamically after stats calculation is done
+        if method == 'eachlevel2d':
+            colname_mapper = {
+                'level1': kwargs['byimage'].coords['C'].values[0],
+                'level2': kwargs['byimage'].coords['C'].values[1],
+            }
+            stats = stats.rename(columns = colname_mapper)
+            df = df.rename(columns = colname_mapper)
             
         return stats, df
     
@@ -164,10 +182,13 @@ class MSND:
         elif method == 'eachlevel':
             self._colnames = ['level', 'lag', 'lag_s', 'T', 'T_s', 'msnd']
             self._calculate = self._eachlevel_msnd
+        elif method == 'eachlevel2d':
+            self._colnames = ['level1', 'level2', 'lag', 'lag_s', 'T', 'T_s', 'msnd']
+            self._calculate = self._eachlevel2d_msnd
         else:
             raise ValueError(
                 f"Unknown method: {method}. "
-                f"Must be one of 'normal', 'weighted', 'eachlevel'."
+                f"Must be one of 'normal', 'weighted', 'eachlevel', 'eachlevel2d'."
             )
 
     @staticmethod
@@ -213,6 +234,49 @@ class MSND:
             )
 
         return xr.concat(msnd, dim='level')
+    
+    def _eachlevel2d_msnd(self,
+        byimage: xr.Dataset,
+        bins: np.ndarray,
+    ) -> xr.DataArray:
+        
+        if isinstance(bins, int):
+            raise ValueError(f"2D-level MSND only supports `bins` "
+                             f"specified as edges, but {type(bins)} "
+                             f"is provided.")
+        
+        def binned_statistic_2d(x1, x2, val, statistic, bins):
+            ret = ss.binned_statistic_2d(
+                x1.flatten(),
+                x2.flatten(),
+                val.flatten(),
+                statistic=statistic,
+                bins=bins,
+            )
+            return ret[0]
+
+        D2, image = xr.align(self._D2, byimage, join='left')
+        centers = (bins[0:-1] + bins[1:])/2
+
+        binned_D2 = (
+            xr.apply_ufunc(
+                binned_statistic_2d,
+                    image.isel(C=0),
+                    image.isel(C=1),
+                    D2,
+                input_core_dims=[['Y','X'], ['Y','X'], ['Y','X']],
+                output_core_dims=[['level1','level2']],
+                vectorize=True,
+                kwargs={
+                    'statistic': lambda x: np.nanmean(x),
+                    'bins': bins,
+                }
+            ).assign_coords({'level1': centers, 'level2': centers})
+        )
+
+        return binned_D2.rename('msnd')
+
+
 
     def _calculate_stats(self, df: pd.DataFrame) -> pd.DataFrame:
         groupby_cols = [c for c in self._colnames if c not in ['T', 'T_s', 'msnd']]
