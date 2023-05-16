@@ -94,8 +94,15 @@ piv:
           GLOBAL: 3
 
 msnd:
-  channel: miRFP670
-  weight_channel: sfGFP
+  channel:
+    - miRFP670
+    - sfGFP
+  #weight_channel: sfGFP
+  bins_args:
+    - -3.5
+    - 3.5
+    - 0.25
+
 
 resources:
   classifiers:
