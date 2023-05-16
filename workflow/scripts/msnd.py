@@ -42,7 +42,7 @@ def main(
     # ii. Eachlevel
     start = bins_args[0]
     end = bins_args[1]
-    steps = int((end - start) / bins_args[2])
+    steps = int((end - start) / bins_args[2] + 1)
     bins = np.linspace(start, end, steps)
     ss = list()
     rs = list()
