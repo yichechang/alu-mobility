@@ -30,6 +30,7 @@ ALL_CH = CINFO['fluoro']
 
 # TODO: Move to config
 ALL_PROTOCOLS = ['matpiv_v2']
+ALL_MSND_PROTOCOLS = ["normal", "eachlevel", "eachlevel2d"]
 
 def get_imageset_files(wildcards):
     from abcdcs import curate
