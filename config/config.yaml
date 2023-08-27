@@ -103,6 +103,22 @@ msnd:
     - 3.5
     - 0.25
 
+msnd_alpha:
+  channel:
+    - miRFP670
+    - sfGFP
+  groupby:
+    normal: 
+    eachlevel:
+      - channel
+      - level
+  min_size:
+    normal: 1
+    eachlevel: 1
+  min_npoints:
+    normal: #leave blanck
+    eachlevel: 5
+
 
 resources:
   classifiers:

@@ -15,6 +15,7 @@ include: "rules/normalize.smk"
 include: "rules/piv.smk"
 # include: "rules/normalize_and_msnd.smk"
 include: "rules/msnd.smk"
+include: "rules/extract_alpha.smk"
 
 
 # -------------------------------------
@@ -38,6 +39,7 @@ rule all:
         [
             all_roi_input,
             all_piv_input,
+            all_msnd_alpha_input,
         ]
 
 # -------------------------------------
@@ -69,3 +71,6 @@ rule all_msnd:
 
 rule all_msnf:
     input: all_msnf_input
+
+rule all_msnd_alpha:
+    input: all_msnd_alpha_input

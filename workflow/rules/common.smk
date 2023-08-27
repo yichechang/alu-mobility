@@ -16,6 +16,7 @@ wildcard_constraints:
     ch = "[\w-]+",
     protocol = "[\w-]+",
     structure = "[\w-]+",
+    msnd_type = "[\w-]+",
 
 def get_channel_info():
     import pandas as pd
