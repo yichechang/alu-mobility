@@ -44,11 +44,11 @@ def main(input_fpath: str,
 
     # downsample if specified
     if downsample is not None:
-        tstack = rescale(original, 1 / downsample,
+        tstack = rescale(original.data, 1 / downsample,
                          order=0, preserve_range=True)
         diameter = diameter / downsample
     else:
-        tstack = original
+        tstack = original.data
 
     # Segment one giant image instead of individual frames
     montaged = montage(tstack, fill=0)
