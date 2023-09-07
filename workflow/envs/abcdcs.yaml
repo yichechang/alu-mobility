@@ -1,4 +1,4 @@
-name: abcd
+name: abcdcs
 channels:
   - conda-forge
 dependencies:
@@ -23,14 +23,15 @@ dependencies:
 # additional plotting
 
 # image processing
-  - napari[all]
+  - napari
+  - pyqt
   - imageio
   - scikit-image
 
 # workflow
   - pyyaml
   - typer
-  - bioconda::snakemake
+  - "bioconda::snakemake!=7.30.2,!=7.31.0"
 
 # pip installed
   - pip
@@ -39,7 +40,7 @@ dependencies:
     - aicsimageio[nd2]
     - aicsimageio[base-imageio]
     - bioformats-jar
-    - git+https://github.com/tlambert03/ome-types.git@ae84abff0fa3371e69ce9d7f99d79a8d95c5d0c7#egg=ome-types
+    - "ome-types>=0.3.4,<0.4.0"
     - cellpose
     - session-info
     - -e ../../abcdcs
