@@ -8,6 +8,76 @@ Date started: 2023-02-02
 
 ---
 
+## Workflow diagram
+
+```mermaid
+graph TD
+    subgraph analysis
+    A(((Analysis)))
+    end
+    A(((Analysis))) --> A81 & A52 & A31 & A35
+
+    subgraph initialize
+    A99((all_init))
+    end
+
+    subgraph interactive rules
+    A98((all_<br>interactive))
+    end
+
+    A1((all_roi))
+
+
+    A2((all_<br>segmentation_<br>nucleus))
+    A3((all_<br>segmentation))
+
+
+    A4((all_<br>measure))
+    A5((all_<br>normalize))
+
+
+    A6((all_piv))
+    A8((all_msnd))
+
+    
+
+    A01[config_template]
+    A99 --> A01
+
+    A02[download_<br>ilasktic_<br>models]
+    A98 --> A02 & A12
+
+    A11[parse_metadata] --> A01
+    A12[draw_roi] --> A11 &  A01
+    A13{crop_roi} --> A12 & A01
+    A14[split_channels] --> A13 & A01
+    A1 --> A12 & A13
+
+    A31[segment_nuclei_<br>in_time] --> A14 & A01
+    A32[mask_nuclear_<br>image_for_ilastic] --> A31 & A13 & A01
+    A33[predict_nucleoli] --> A32 & A02 & A01
+    A34[conver_tiff_<br>to_ometif] --> A33 & A01
+    A35[segment_<br>nucleoplasm] --> A31 & A34 & A01
+    A2 --> A31
+    A3 --> A31 & A35
+
+    A41[measure] --> A13 & A31 & A35 & A01
+    A42[combine_<br>measurements] --> A41 & A01
+    A4 --> A42
+
+    A51[normalize_<br>singlechannel] --> A14 & A31 & A35 & A01
+    A52[normalize_<br>multichannel] --> A51 & A01
+    A5 --> A51 & A52
+
+    A61[gen_piv_<br>config_json] --> A01
+    A62[piv] --> A61 & A14 & A01
+    A6 --> A62
+
+
+    A81[msnd] --> A62 & A52 & A31 & A01
+    A8 --> A81
+```
+
 ## Dependencies
 
 Dependencies are listed in [workflow/envs/abcdcs.yaml](workflow/envs/abcdcs.yaml) 
