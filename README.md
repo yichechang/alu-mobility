@@ -10,7 +10,7 @@ Date started: 2023-02-02
 
 ## Dependencies
 
-Dependencies are listed in [workflow/envs/abcd.yaml](workflow/envs/abcd.yaml) 
+Dependencies are listed in [workflow/envs/abcdcs.yaml](workflow/envs/abcdcs.yaml) 
 file and can be installed as a conda environment using either conda or
 mamba. 
 
@@ -19,15 +19,20 @@ create an empty environment before we can install dependencies specified
 in an yaml file. See the [issue and solution](https://github.com/mamba-org/mamba/issues/633#issuecomment-812272143).
 
 ```
-mamba create -n abcd
-mamba env update -n abcd -f workflow/envs/abcd.yaml
+mamba create -n abcdcs
+mamba env update -n abcdcs -f workflow/envs/abcdcs.yaml
 ```  
+
+### wget
+
 
 ### ilastik
 Install manually before the first run. 
 
 ```
-mamba create -n ilastik --override-channels -c pytorch -c ilastik-forge -c conda-forge ilastik
+mamba create -n ilastik 
+mamba activate ilastik
+mamba install -c ilastik-forge ilastik
 ```
 
 **TODO**: add to conda environment for snakemake to create this on the 
@@ -39,16 +44,19 @@ You'll need to have `matlab` on your path. This can either be done by
 manually creating a symbolic link to the matlab executable, or by using
 the environment modules on a cluster (e.g. `module load matlab/R2019b`).
 
+Note: Do not rely on *alias*. It is fragile and likely won't work when
+Snakemake execute a `shell` directive.
+
 
 ## Executing snakemake workflow
 
 ### On local machine
-1. `conda activate abcy_py38`
+1. `conda activate abcdcs`
 2. `cd` to analysis folder
 3. Issue the following command to initialize the workflow:
    ```bash
    snakemake \
-     -s ~/repository/phd-analysis/abc-mobility/workflow/Snakefile \
+     -s {path/to/this/repo}/workflow/Snakefile \
      -c1 \
      init
    ```
@@ -57,14 +65,19 @@ the environment modules on a cluster (e.g. `module load matlab/R2019b`).
 4. Edit the config file according to the experiment.
 5. Run snakemake locally, optionally specify target rule. (See 
    [`Snakefile`](workflow/Snakefile) for possible *all*-type rules.)
+   ```bash
+   snakemake \
+     -s {path/to/this/repo}/workflow/Snakefile \
+     --configfile config.yaml \
+     --use-conda \
+     -c{n}
+   ```
 
-```
-snakemake \
-  -s ~/repository/phd-analysis/abc-mobility/workflow/Snakefile \
-  --configfile config.yaml \
-  --use-conda \
-  -c4
-```
+Note: If testing the repo with the test data, treat the repo folder as
+the *analysis folder* mentioned above in step 2. And also no need to 
+specify where the main snakemake file and configureation files are,
+via `-s` and `--configfile`, respectively. 
+
 
 ### On della
 
@@ -74,7 +87,7 @@ snakemake \
 3. Issue the following command to initialize the workflow:
    ```bash
    snakemake \
-     -s ~/abc-mobility/workflow/Snakefile \
+     -s {path/to/this/repo}/workflow/Snakefile \
      -c1 \
      init
    ```
@@ -87,9 +100,9 @@ snakemake \
 2. Launch terminal and `module load anaconda3/2022.10 && conda activate abcd`
 3. `cd` to analysis folder, and run
 
-```
+```bash
 snakemake \
-  -s ~/abc-mobility/workflow/Snakefile \
+  -s {path/to/this/repo}/workflow/Snakefile \
   --configfile config.yaml \
   --use-conda \
   --use-envmodules \
@@ -107,19 +120,19 @@ snakemake \
 
 ```
 snakemake \
-  -s ~/abc-mobility/workflow/Snakefile \
+  -s {path/to/this/repo}/workflow/Snakefile \
   --configfile config.yaml \
   --use-conda \
   --use-envmodules \
-  -c<n> \
+  -c{n} \
   all && \
 scancel $SLURM_JOB_ID
 ```
 
-where `<n>` is the core requested in the `salloc` command.
+where `{n}` is the core requested in the `salloc` command.
 
 
-## Versions
+## Versions (note this section is outdated)
 
 ### Tagging system explanation
 This repository currently contains both 
