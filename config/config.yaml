@@ -8,9 +8,9 @@
 # characters are used. More importantly, even if they are quoted here,
 # they still need to be quoted again when used in the "shell" derivative.
 input:
-  samplesheet_path: /Users/yi-che/repository/phd-analysis/abc-mobility/data/example_nd2/samplesheet.csv
+  samplesheet_path: data/example_nd2/samplesheet.csv
   image_path:
-    dir: /Users/yi-che/repository/phd-analysis/abc-mobility/data/example_nd2
+    dir: data/example_nd2
     glob: '*.nd2'
     regex: 'Well(?P<WellID>[A-H]\d{2})_Fov(?P<FovID>\d{3}).nd2'
   datefmt: 
