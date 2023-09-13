@@ -9,13 +9,20 @@ Date started: 2023-02-02
 ---
 
 ## Workflow diagram
+TODO: Update workflow diagram to be data-centric instead of rule-centric
+
+🚧 Nucleoli segmentation rule is currently not very useful because
+it assumes the input movies contain BFP channel which is used for
+ilastik-based pixel-classification. So if attempting to target rule
+`all_segmentation`, snakemake will raise a `MissingInputException` if
+BFP channel isn't available.
 
 ```mermaid
 graph TD
     subgraph analysis
     A(((Analysis)))
     end
-    A(((Analysis))) --> A81 & A52 & A31 & A35
+    A(((Analysis))) --> A91 & A81 & A52 & A31 & A35
 
     subgraph initialize
     A99((all_init))
@@ -38,6 +45,7 @@ graph TD
 
     A6((all_piv))
     A8((all_msnd))
+    A9((all_msnd_alpha))
 
     
 
@@ -76,6 +84,11 @@ graph TD
 
     A81[msnd] --> A62 & A52 & A31 & A01
     A8 --> A81
+
+
+    A91[fit_msnd_line] --> A81
+    A92[instantaneous_alphas] --> A81
+    A9 --> A91 & A92
 ```
 
 ## Dependencies
