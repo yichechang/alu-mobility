@@ -130,14 +130,8 @@ rule sn_segment_nucleoplasm:
         OmeTiffWriter.save(npl.data, output.npl, dim_order="YX")
 
 
-# all_segment_nucleoli_input = [
-#     lambda w: expand("results/sn/segmentation/{structure}/{RoiUID}.ome.tif",
-#                      structure=['nucleoli', 'nucleoplasm'],
-#                      RoiUID=sn_get_checkpoint_RoiUID(w)),
-# ]
-
 all_segment_nucleoli_input = [
     lambda w: expand("results/sn/segmentation/{structure}/{RoiUID}.ome.tif",
                      structure=['nucleoli', 'nucleoplasm'],
-                     RoiUID=['y505_2023-05-01_1_live_E03_1_1']),
+                     RoiUID=sn_get_checkpoint_RoiUID(w)),
 ]
