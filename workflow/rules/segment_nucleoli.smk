@@ -48,8 +48,6 @@ rule sn_mask_tiff:
                                  squeeze=True, drop_single_C=True)
         masked = (image
             .pipe(imageop.Image.mask_to_keep, mask)
-            .squeeze('T')
-            .expand_dims(T=[0,1])
             .transpose('T','Z','C','Y','X')
         )
         
