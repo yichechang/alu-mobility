@@ -22,7 +22,7 @@ graph TD
     subgraph analysis
     A(((Analysis)))
     end
-    A(((Analysis))) --> A91 & A81 & A52 & A31 & A35
+    A(((Analysis))) --> B14 & B15 & A91 & A92 & A81 & A52 & A31 & A35
 
     subgraph initialize
     A99((all_init))
