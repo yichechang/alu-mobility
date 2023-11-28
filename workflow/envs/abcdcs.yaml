@@ -27,6 +27,7 @@ dependencies:
   - pyqt
   - imageio
   - scikit-image
+  - pystackreg
 
 # workflow
   - pyyaml

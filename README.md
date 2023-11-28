@@ -33,7 +33,7 @@ graph TD
     end
 
     A1((all_roi))
-
+    C1((all_<br>register))
 
     A2((all_<br>segmentation_<br>nucleus))
     A3((all_<br>segmentation))
@@ -60,6 +60,9 @@ graph TD
     A13{crop_roi} --> A12 & A01
     A14[split_channels] --> A13 & A01
     A1 --> A12 & A13
+
+    C11[register_nucleus] --> A13 & A01
+    C1 --> C11
 
     A31[segment_nuclei_<br>in_time] --> A14 & A01
     A32[mask_nuclear_<br>image_for_ilastic] --> A31 & A13 & A01
