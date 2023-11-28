@@ -121,6 +121,12 @@ msnd_alpha:
 
 
 resources:
-  classifiers:
-    u2os_nucleoli_bfp_v1:
-      url: 'https://www.dropbox.com/s/ryoma1qvklinxn6/u2os_nucleoli_bfp_v1.ilp?dl=1'
+  ilastik:
+    u2os_nucleoli_bfp_v1: 'https://www.dropbox.com/s/ryoma1qvklinxn6/u2os_nucleoli_bfp_v1.ilp?dl=1'
+    u2os_nucleoli_bfp_v2: 'https://www.dropbox.com/scl/fi/vv4n4246dsxa472wvpbeg/u2os_nucleoli_bfp_v2.ilp?rlkey=8co2dui00tegjxtfef86gnl5j&dl=1'
+
+
+sn:
+  predict_nucleoli:
+    channel_index: 1
+    model_name: u2os_nucleoli_bfp_v2

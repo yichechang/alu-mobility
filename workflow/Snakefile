@@ -10,6 +10,7 @@ include: "rules/common.smk"
 include: "rules/resources.smk"
 include: "rules/roi.smk"
 include: "rules/segmentation.smk"
+include: "rules/segment_nucleoli.smk"
 include: "rules/measure.smk"
 include: "rules/normalize.smk"
 include: "rules/piv.smk"
@@ -50,6 +51,9 @@ rule all_roi:
 
 rule all_segmentation_nucleus:
     input: all_segmentation_nucleus_input
+
+rule all_segmentation_nucleoli:
+    input: all_segment_nucleoli_input
 
 rule all_segmentation:
     input: all_segmentation_input

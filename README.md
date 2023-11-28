@@ -22,7 +22,7 @@ graph TD
     subgraph analysis
     A(((Analysis)))
     end
-    A(((Analysis))) --> A91 & A81 & A52 & A31 & A35
+    A(((Analysis))) --> B14 & B15 & A91 & A92 & A81 & A52 & A31 & A35
 
     subgraph initialize
     A99((all_init))
@@ -47,7 +47,7 @@ graph TD
     A8((all_msnd))
     A9((all_msnd_alpha))
 
-    
+    B1((all_<br>segmentation_<br>nucleoli))    
 
     A01[config_template]
     A99 --> A01
@@ -89,6 +89,13 @@ graph TD
     A91[fit_msnd_line] --> A81
     A92[instantaneous_alphas] --> A81
     A9 --> A91 & A92
+
+    B11{sn_crop_roi} --> A12
+    B12[sn_mask_tiff] --> B11 & A31
+    B13[sn_predict_<br>nucleoli] --> B12 & A02
+    B14[sn_convert_<br>to_ometif] --> B13
+    B15[sn_segment_<br>nucleoplasm] --> B14 & A31
+    B1 --> B14 & B15
 ```
 
 ## Dependencies
