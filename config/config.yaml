@@ -1,33 +1,43 @@
 # ======================================================================
-#
+# Download resources
+#   - ilastik classifiers
+#   - example data: if using data supplied by user, set `download` to 
+#     false
+# ======================================================================
+resources:
+  ilastik:
+    u2os_nucleoli_bfp_v1: 'https://www.dropbox.com/s/ryoma1qvklinxn6/u2os_nucleoli_bfp_v1.ilp?dl=1'
+    u2os_nucleoli_bfp_v2: 'https://www.dropbox.com/scl/fi/vv4n4246dsxa472wvpbeg/u2os_nucleoli_bfp_v2.ilp?rlkey=8co2dui00tegjxtfef86gnl5j&dl=1'
+  example_data:
+    name: alu-repo-sample-data.zip
+    url: 'https://www.dropbox.com/scl/fo/mwzas1osvhsdv49jhf4gm/h?rlkey=383hoze85fb5pueq0dgdkv7we&dl=1'
+    download: true
+
+
+# ======================================================================
 # Experiment-specific configurations
-#
 # ======================================================================
 
 # No need to quote the strings in yaml files, but do so when special 
 # characters are used. More importantly, even if they are quoted here,
 # they still need to be quoted again when used in the "shell" derivative.
 input:
-  samplesheet_path: data/example_nd2/samplesheet.csv
+  samplesheet_path: resources/example_data/samplesheet.csv
   image_path:
-    dir: data/example_nd2
-    glob: '*.nd2'
-    regex: 'Well(?P<WellID>[A-H]\d{2})_Fov(?P<FovID>\d{3}).nd2'
-  datefmt: 
+    dir: resources/example_data
+    glob: '*002_Deno.nd2'
+    regex: 'Well(?P<WellID>[A-H]\d{2})_\w+_fov(?P<FovID>\d{3})_snap-nodelay-snap002_Deno.nd2'
+  datefmt: # leave blank if not used
   # channels has to be in the order as how they present in the raw file
   channels: 
-    - oc: 640 nm
+    - oc: "640"
       fluoro: miRFP670
       colormap: magenta
-      background: 400 
-    - oc: 488 nm
+      background: 100 
+    - oc: "488"
       fluoro: sfGFP
       colormap: green
-      background: 400
-    - oc: 405 nm
-      fluoro: BFP
-      colormap: blue
-      background: 400
+      background: 100
   bitdepth: 16
 
 parse_metadata:
@@ -35,34 +45,50 @@ parse_metadata:
   verbose: True
   patch: True
 
-
 build_imagelist:
   nafilter: strict
   patch: True
   verbose: True
 
+# 1. channels has to be in the order as how they have been specified 
+#    in 'input' module above.
+# 2. if you don't specify all the channels from the movies, those 
+#    unspecified channels will be lost, creating unexpected behaviors
+#    downstream.
+register_nucleus:
+  transformation: RIGID_BODY
+  mode: previous
+  registers:
+    - target: miRFP670
+      by: sfGFP
+    - target: sfGFP
+      by: miRFP670
+
 segment_nuclei_in_time:
   channel: sfGFP
-  diameter: 100
-  downsample: 2
-
+  diameter: 300
+  downsample: 10
 
 normalize:
   structure:
     - nucleus
-    - nucleoplasm
+    # - nucleoplasm
   method: zscore
   # nested as dict. leave it empty if not needed
   method_kwargs:
 
-
 normalize_intensity:
-  background: 400
+  background: 100
 
+# THIS IS NOT USED FOR DATASET WITHOUT BFP RECORDED IN MOVIE
+# predict_nucleoli:
+#   channel: BFP
+#   model_name: u2os_nucleoli_bfp_v1
 
-predict_nucleoli:
-  channel: BFP
-  model_name: u2os_nucleoli_bfp_v1
+sn:
+  predict_nucleoli:
+    channel_index: 1
+    model_name: u2os_nucleoli_bfp_v2
 
 measure:
   structure:
@@ -75,7 +101,7 @@ piv:
     - miRFP670
     - sfGFP
   movie_meta:
-    PIXELSIZE: 0.135
+    PIXELSIZE: 0.065
     DT: 0.5
     LAGS_EXPRESSION: "unique(ceil(logspace(0,log10(50),15)))" 
   protocol: matpiv_v2
@@ -83,7 +109,7 @@ piv:
     matpiv_v2:
       CONFIG:
         PREPROCESS:
-          BACK: 210
+          BACK: 100
         PIV:
           WINSIZE: 16
           OVERLAP: 0.75
@@ -97,7 +123,6 @@ msnd:
   channel:
     - miRFP670
     - sfGFP
-  #weight_channel: sfGFP
   bins_args:
     - -3.5
     - 3.5
@@ -113,20 +138,8 @@ msnd_alpha:
       - channel
       - level
   min_size:
-    normal: 1
-    eachlevel: 1
+    normal: 10
+    eachlevel: 30
   min_npoints:
     normal: #leave blanck
     eachlevel: 5
-
-
-resources:
-  ilastik:
-    u2os_nucleoli_bfp_v1: 'https://www.dropbox.com/s/ryoma1qvklinxn6/u2os_nucleoli_bfp_v1.ilp?dl=1'
-    u2os_nucleoli_bfp_v2: 'https://www.dropbox.com/scl/fi/vv4n4246dsxa472wvpbeg/u2os_nucleoli_bfp_v2.ilp?rlkey=8co2dui00tegjxtfef86gnl5j&dl=1'
-
-
-sn:
-  predict_nucleoli:
-    channel_index: 1
-    model_name: u2os_nucleoli_bfp_v2

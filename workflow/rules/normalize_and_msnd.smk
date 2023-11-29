@@ -1,6 +1,6 @@
 rule normalize_intensity:
     input:
-        image="results/image/multi_ch/{RoiUID}.ome.tif",
+        image="results/image_registered/multi_ch/{RoiUID}.ome.tif",
         mask="results/segmentation/nucleus/{RoiUID}.ome.tif",
     output:
         nuc="results/image_normalized_nucleus/{RoiUID}.ome.tif",

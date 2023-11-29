@@ -9,6 +9,7 @@ include: "rules/init.smk"
 include: "rules/common.smk"
 include: "rules/resources.smk"
 include: "rules/roi.smk"
+include: "rules/register.smk"
 include: "rules/segmentation.smk"
 include: "rules/segment_nucleoli.smk"
 include: "rules/measure.smk"
@@ -48,6 +49,9 @@ rule all:
 # -------------------------------------
 rule all_roi:
     input: all_roi_input
+
+rule all_register:
+    input: all_register_input
 
 rule all_segmentation_nucleus:
     input: all_segmentation_nucleus_input
