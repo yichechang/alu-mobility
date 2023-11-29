@@ -1,6 +1,6 @@
 rule normalize_singlechannel:
     input:
-        image="results/image/single_ch/{ch}/{RoiUID}.ome.tif",
+        image="results/image_registered/single_ch/{ch}/{RoiUID}.ome.tif",
         mask="results/segmentation/{structure}/{RoiUID}.ome.tif",
     output:
         image="results/image_normalized/by_{structure}/single_ch/{ch}/{RoiUID}.ome.tif"

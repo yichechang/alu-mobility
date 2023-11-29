@@ -58,21 +58,21 @@ graph TD
     A11[parse_metadata] --> A01
     A12[draw_roi] --> A11 &  A01
     A13{crop_roi} --> A12 & A01
-    A14[split_channels] --> A13 & A01
-    A1 --> A12 & A13
+    A14[split_channels] --> C11 & A01
+    A1 --> A12 & C11
 
     C11[register_nucleus] --> A13 & A01
     C1 --> C11
 
     A31[segment_nuclei_<br>in_time] --> A14 & A01
-    A32[mask_nuclear_<br>image_for_ilastic] --> A31 & A13 & A01
+    A32[mask_nuclear_<br>image_for_ilastic] --> A31 & C11 & A01
     A33[predict_nucleoli] --> A32 & A02 & A01
     A34[conver_tiff_<br>to_ometif] --> A33 & A01
     A35[segment_<br>nucleoplasm] --> A31 & A34 & A01
     A2 --> A31
     A3 --> A31 & A35
 
-    A41[measure] --> A13 & A31 & A35 & A01
+    A41[measure] --> C11 & A31 & A35 & A01
     A42[combine_<br>measurements] --> A41 & A01
     A4 --> A42
 

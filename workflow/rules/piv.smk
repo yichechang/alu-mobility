@@ -15,7 +15,7 @@ rule piv:
     input:
         pivconfig = expand("{protocol}_config.json", 
                            protocol=config['piv']['protocol']),
-        movie = "results/image/single_ch/{ch}/{RoiUID}.ome.tif"
+        movie = "results/image_registered/single_ch/{ch}/{RoiUID}.ome.tif"
     output:
         "results/piv/{protocol}/{ch}/{RoiUID}.mat"
     params:

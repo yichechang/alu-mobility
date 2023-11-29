@@ -51,9 +51,9 @@ checkpoint crop_roi:
 
 rule split_channels:
     input:
-        "results/image/multi_ch/{RoiUID}.ome.tif"
+        "results/image_registered/multi_ch/{RoiUID}.ome.tif"
     output:
-        expand("results/image/single_ch/{ch}/{RoiUID}.ome.tif", 
+        expand("results/image_registered/single_ch/{ch}/{RoiUID}.ome.tif", 
                ch=ALL_CH, allow_missing=True)
     resources:
         mem = 1000, 
@@ -68,6 +68,6 @@ all_draw_roi_input = 'results/roilist.csv'
 all_roi_input = [
     lambda w: expand("results/image/multi_ch/{RoiUID}.ome.tif", 
                      RoiUID=get_checkpoint_RoiUID(w)),
-    lambda w: expand("results/image/single_ch/{ch}/{RoiUID}.ome.tif", 
+    lambda w: expand("results/image_registered/single_ch/{ch}/{RoiUID}.ome.tif", 
                      ch=ALL_CH, RoiUID=get_checkpoint_RoiUID(w)),
 ]

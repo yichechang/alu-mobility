@@ -5,7 +5,7 @@ rule register_nucleus:
     input:
         multi="results/image/multi_ch/{RoiUID}.ome.tif",
     output:
-        multi="results/image_registered/{RoiUID}.ome.tif",
+        multi="results/image_registered/multi_ch/{RoiUID}.ome.tif",
     params:
         fluoros=[ch['fluoro'] for ch in config['input']['channels']],
         bitdepth=config['input']['bitdepth'],
@@ -52,7 +52,7 @@ rule register_nucleus:
 
 all_register_input = [
     lambda w: expand(
-        "results/image_registered/{RoiUID}.ome.tif",
+        "results/image_registered/multi_ch/{RoiUID}.ome.tif",
         RoiUID=get_checkpoint_RoiUID(w)
     ),
 ]
