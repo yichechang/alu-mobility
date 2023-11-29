@@ -13,6 +13,7 @@ rule register_nucleus:
         transformation=config['register_nucleus']['transformation'],
         mode=config['register_nucleus']['mode'],
     run:
+        import numpy as np
         import xarray as xr
         from pystackreg import StackReg
         from aicsimageio.writers.ome_tiff_writer import OmeTiffWriter
@@ -53,6 +54,13 @@ rule register_nucleus:
             sr = StackReg(transformations[params.transformation])
             tmats = sr.register_stack(by_data, reference=params.mode)
             reg = sr.transform_stack(target_data)
+
+            # negative value clipping and cast back to uint16
+            # because pystackreg returns float
+            min_over_time = np.min(target_data, axis=tuple(range(1, reg.ndim)))
+            for im, im_min in zip(reg, min_over_time):
+                im[im<=0] = im_min
+            reg = reg.astype('uint16')
             
             # assemble a dataarray for registered result
             image_noC_firstT = image_noC.transpose(*dims_noC_firstT)
