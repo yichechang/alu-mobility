@@ -9,19 +9,22 @@ rule register_nucleus:
     params:
         fluoros=[ch['fluoro'] for ch in config['input']['channels']],
         bitdepth=config['input']['bitdepth'],
+        registers=config['register_nucleus']['registers'],
+        transformation=config['register_nucleus']['transformation'],
+        mode=config['register_nucleus']['mode'],
     run:
-        """
-        This rule registers the first two channels of a movie to each 
-        other. Any additional channels remain untouched in the 
-        'registered' output, yielding a multi-channel image per the 
-        config spec.
-        
-        Note: Only the first two channels are registered!
-        """
         import xarray as xr
         from pystackreg import StackReg
         from aicsimageio.writers.ome_tiff_writer import OmeTiffWriter
         from abcdcs import imageop
+
+        transformations = {
+            'TRANSLATION': StackReg.TRANSLATION,
+            'RIGID_BODY': StackReg.RIGID_BODY,
+            'SCALED_ROTATION': StackReg.SCALED_ROTATION,
+            'AFFINE': StackReg.AFFINE,
+            'BILINEAR': StackReg.BILINEAR
+        }
 
         images = (
             imageop.Image.read(
@@ -33,21 +36,42 @@ rule register_nucleus:
             .squeeze()
         )
         
-        def register(by, to, mode="previous"):
-            sr = StackReg(StackReg.RIGID_BODY)
-            tmats = sr.register_stack(by, reference=mode)
-            out = sr.transform_stack(to)
-            return tmats, out
+        def _dims_T_first(da):
+            all_dims = list(da.dims)
+            remaining_dims = [dim for dim in all_dims if dim != 'T']
+            return ['T'] + remaining_dims
 
-        _, registered_0 = register(images.isel(C=1).data, images.isel(C=0).data)
-        _, registered_1 = register(images.isel(C=0).data, images.isel(C=1).data)
 
-        # lazy way of preserving coordinates and only swapping pixel data
-        # TODO: make it not depend on these 
-        registered = images.copy()
-        registered.isel(C=0).data = registered_0
-        registered.isel(C=1).data = registered_1
-        OmeTiffWriter.save(registered.data, output.multi, dim_order='TCYX')
+        def register(image, target, by):
+            # prepare data to feed pystackreg: numpy with T being first dim
+            image_noC = image.isel(C=0).drop_vars('C')
+            dims_noC_firstT = _dims_T_first(image_noC)
+            target_data = image.sel(C=target).transpose(*dims_noC_firstT).data
+            by_data = image.sel(C=by).transpose(*dims_noC_firstT).data
+
+            # actual part for registering
+            sr = StackReg(transformations[params.transformation])
+            tmats = sr.register_stack(by_data, reference=params.mode)
+            reg = sr.transform_stack(target_data)
+            
+            # assemble a dataarray for registered result
+            image_noC_firstT = image_noC.transpose(*dims_noC_firstT)
+            dims = image_noC_firstT.dims
+            coords = image_noC_firstT.coords
+            # assemble dataarray to have no C and T being first dim
+            da = xr.DataArray(reg, coords=coords, dims=dims)
+            # return to the original dim order
+            da = da.transpose(*image_noC.dims)
+            # assign C coords value
+            da = da.assign_coords(C=target)
+            return da
+
+        registered = []
+        for r in params.registers:
+            registered.append(register(images, target=r['target'], by=r['by']))
+        registered_da = xr.concat(registered, dim='C').transpose(*images.dims)
+        
+        OmeTiffWriter.save(registered_da.data, output.multi, dim_order='TCYX')
 
 
 all_register_input = [
