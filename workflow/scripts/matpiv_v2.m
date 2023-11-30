@@ -107,7 +107,8 @@ function moviestack = load_movie(moviepath, bkgd)
     moviestack = zeros(movieinfos(1).Height, movieinfos(1).Width, nframe);
     for t = 1:nframe
         tmp = imread(moviepath, t);
-        moviestack(:,:,t) = double(tmp) - bkgd;
+        %moviestack(:,:,t) = double(tmp) - bkgd;
+        moviestack(:,:,t) = double(tmp);
     end
 end
 
