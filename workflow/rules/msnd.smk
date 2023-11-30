@@ -2,7 +2,8 @@ rule msnd:
     input:
         piv="results/piv/{protocol}/{ch}/{RoiUID}.mat",
         image="results/image_normalized/by_nucleus/multi_ch/{RoiUID}.ome.tif",
-        mask="results/segmentation/nucleus/{RoiUID}.ome.tif",
+        nucmask="results/segmentation/nucleus/{RoiUID}.ome.tif",
+        npmask="results/sn/segmentation/nucleoplasm/{RoiUID}.ome.tif",
     output:
         expand(
             "results/msnd/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_{outtype}.csv",
@@ -20,7 +21,8 @@ rule msnf:
     input:
         piv="results/piv/{protocol}/{ch}/{RoiUID}.mat",
         image="results/image_normalized/by_nucleus/multi_ch/{RoiUID}.ome.tif",
-        mask="results/segmentation/nucleus/{RoiUID}.ome.tif",
+        nucmask="results/segmentation/nucleus/{RoiUID}.ome.tif",
+        npmask="results/sn/segmentation/nucleoplasm/{RoiUID}.ome.tif",
     output:
         expand(
             "results/msnf/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_{outtype}.csv",

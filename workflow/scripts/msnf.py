@@ -10,25 +10,27 @@ from abcdcs import imageop, loadpiv, pivop, msnd
 
 def main(
     piv_path: str,
-    mask_path: str,
+    nucmask_path: str,
+    npmask_path: str,
     image_path: str,
     chnames: List[str],
     bins_args: Tuple[float, float, float],
     outdir: str,
     roiuid: str
 ) -> None:
-    image, mask, piv = _read_data(
-        image_path, mask_path, piv_path,
+    image, nucmask, npmask, piv = _read_data(
+        image_path, nucmask_path, npmask_path, piv_path,
         chnames=chnames,
     )
 
     # I. Prepare data
     image_blurred = _blur_image(image)
-    mask_inner = imageop.Mask.erode_by_disk(mask, radius=15)
+    mask_inner_nucleus = imageop.Mask.erode_by_disk(nucmask, radius=15)
 
     # filter piv by 1. nucleus mask and 2. max 4 px in each component
     piv_filtered = (piv
-        .pipe(pivop.mask_filter, mask=mask_inner)
+        .pipe(pivop.mask_filter, mask=mask_inner_nucleus)
+        .pipe(pivop.mask_filter, mask=npmask)
         .pipe(pivop.global_filter, components=['u','v'], max=4)
     )
 
@@ -71,18 +73,24 @@ def main(
             fpath = Path(outdir) / mode / f"{roiuid}_{dfname}.csv"
             df.to_csv(str(fpath), index=False)
 
-def _read_data(image_path: str, mask_path: str, piv_path: str,
-              chnames: List[str],
+def _read_data(
+    image_path: str, 
+    nucmask_path: str, 
+    npmask_path: str, 
+    piv_path: str, 
+    chnames: List[str],
 ) -> Tuple[xr.Dataset, xr.DataArray]:
     """
     Load image and mask from a single nucleus.
     """
     image = imageop.Image.read(
         image_path, 'DataArray', chnames, squeeze=True)
-    mask = imageop.Mask.read(mask_path, 'DataArray',
-                squeeze=True, drop_single_C=True)
+    nucmask = imageop.Mask.read(nucmask_path, 'DataArray',
+                                squeeze=True, drop_single_C=True)
+    npmask = imageop.Mask.read(npmask_path, 'DataArray',
+                               squeeze=True, drop_single_C=True)
     piv = loadpiv.read_matpiv(piv_path)
-    return image, mask, piv
+    return image, nucmask, npmask, piv
 
 
 def _blur_image(image: xr.DataArray, sigma: float = 0.5
@@ -119,7 +127,8 @@ if __name__ == '__main__':
     if 'snakemake' in globals():
         main(
             piv_path = snakemake.input.piv,
-            mask_path = snakemake.input.mask,
+            nucmask_path = snakemake.input.nucmask,
+            npmask_path = snakemake.input.npmask,
             image_path = snakemake.input.image,
             chnames = snakemake.params.chnames,
             bins_args = snakemake.config['msnd']['bins_args'],
