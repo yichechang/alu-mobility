@@ -72,12 +72,6 @@ normalize:
   # nested as dict. leave it empty if not needed
   method_kwargs:
 
-
-# THIS IS NOT USED FOR DATASET WITHOUT BFP RECORDED IN MOVIE
-# predict_nucleoli:
-#   channel: BFP
-#   model_name: u2os_nucleoli_bfp_v1
-
 sn:
   predict_nucleoli:
     channel_index: 1

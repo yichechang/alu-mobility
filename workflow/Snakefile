@@ -59,9 +59,6 @@ rule all_segmentation_nucleus:
 rule all_segmentation_nucleoli:
     input: all_segment_nucleoli_input
 
-rule all_segmentation:
-    input: all_segmentation_input
-
 rule all_measure:
     input: all_measure_input
 
