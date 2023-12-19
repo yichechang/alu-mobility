@@ -45,11 +45,6 @@ parse_metadata:
   verbose: True
   patch: True
 
-build_imagelist:
-  nafilter: strict
-  patch: True
-  verbose: True
-
 # 1. channels has to be in the order as how they have been specified 
 #    in 'input' module above.
 # 2. if you don't specify all the channels from the movies, those 
