@@ -15,7 +15,6 @@ include: "rules/segment_nucleoli.smk"
 include: "rules/measure.smk"
 include: "rules/normalize.smk"
 include: "rules/piv.smk"
-# include: "rules/normalize_and_msnd.smk"
 include: "rules/msnd.smk"
 include: "rules/extract_alpha.smk"
 
@@ -43,7 +42,7 @@ rule all:
             all_piv_input,
             all_msnd_alpha_input,
             all_measure_input,
-            all_segmentation_nucleoli_input,
+            all_segment_nucleoli_input,
         ]
 
 # -------------------------------------
