@@ -72,8 +72,6 @@ normalize:
   # nested as dict. leave it empty if not needed
   method_kwargs:
 
-normalize_intensity:
-  background: 100
 
 # THIS IS NOT USED FOR DATASET WITHOUT BFP RECORDED IN MOVIE
 # predict_nucleoli:

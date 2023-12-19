@@ -71,9 +71,6 @@ rule all_normalize:
 rule all_piv:
     input: all_piv_input
 
-# rule all_normalize_and_msnd:
-#     input: all_normalize_and_msnd_input
-
 rule all_msnd:
     input: all_msnd_input
 
