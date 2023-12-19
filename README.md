@@ -16,7 +16,7 @@ graph TD
     subgraph analysis
     A(((Analysis)))
     end
-    A(((Analysis))) --> B14 & B15 & A91 & A92 & A81 & A52 & A31
+    A(((Analysis))) --> B14 & B15 & A91 & A92 & A81 & A82 & A52 & A31 & A42
 
     subgraph initialize
     A99((all_init))
@@ -74,11 +74,12 @@ graph TD
 
 
     A81[msnd] --> A62 & A52 & A31 & A01
-    A8 --> A81
+    A82[msnf] --> A62 & A52 & A31 & A01
+    A8 --> A81 & A82
 
 
-    A91[fit_msnd_line] --> A81
-    A92[instantaneous_alphas] --> A81
+    A91[fit_msnd_line] --> A81 & A82
+    A92[instantaneous_alphas] --> A81 & A82
     A9 --> A91 & A92
 
     B11{sn_crop_roi} --> A12

@@ -42,6 +42,8 @@ rule all:
             all_roi_input,
             all_piv_input,
             all_msnd_alpha_input,
+            all_measure_input,
+            all_segmentation_nucleoli_input,
         ]
 
 # -------------------------------------
