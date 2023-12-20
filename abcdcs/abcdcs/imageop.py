@@ -279,9 +279,9 @@ class Normalize:
 
         Default corresponds to p2 and p98.
         """
-        p = np.nanpercentile(data, p)
-        q = np.nanpercentile(data, 100-p)
-        return (data - p) / (q - p)
+        _p = np.nanpercentile(data, p)
+        _q = np.nanpercentile(data, 100-p)
+        return (data - _p) / (_q - _p)
     
     @staticmethod
     def _zscore_params(data):
