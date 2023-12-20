@@ -2,3 +2,7 @@
 	path = bim-xarray
 	url = https://github.com/SoftLivingMatter/bim-xarray.git
 	branch = release/alu-piv-pipeline
+[submodule "chromotion"]
+	path = chromotion
+	url = https://github.com/yichechang/chromotion.git
+	branch = release/alu-piv-pipeline
