@@ -18,7 +18,7 @@ import functools
 import numpy as np
 import xarray as xr
 
-from abcdcs import imageop
+from . import imageop
 
 # --------------------------------
 # decorators
