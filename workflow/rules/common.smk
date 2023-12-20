@@ -34,7 +34,6 @@ ALL_PROTOCOLS = ['matpiv_v2']
 ALL_MSND_PROTOCOLS = ["normal", "eachlevel", "eachlevel2d"]
 
 def get_imageset_files(wildcards):
-    from abcdcs import curate
     files = []
     image_path = config['input']['image_path']
     globbed = Path(image_path['dir']).rglob(image_path['glob'])

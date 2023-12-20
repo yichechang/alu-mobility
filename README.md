@@ -11,18 +11,12 @@ Date started: 2023-02-02
 ## Workflow diagram
 TODO: Update workflow diagram to be data-centric instead of rule-centric
 
-🚧 Nucleoli segmentation rule is currently not very useful because
-it assumes the input movies contain BFP channel which is used for
-ilastik-based pixel-classification. So if attempting to target rule
-`all_segmentation`, snakemake will raise a `MissingInputException` if
-BFP channel isn't available.
-
 ```mermaid
 graph TD
     subgraph analysis
     A(((Analysis)))
     end
-    A(((Analysis))) --> B14 & B15 & A91 & A92 & A81 & A52 & A31 & A35
+    A(((Analysis))) --> B14 & B15 & A91 & A92 & A81 & A82 & A52 & A31 & A42
 
     subgraph initialize
     A99((all_init))
@@ -36,7 +30,6 @@ graph TD
     C1((all_<br>register))
 
     A2((all_<br>segmentation_<br>nucleus))
-    A3((all_<br>segmentation))
 
 
     A4((all_<br>measure))
@@ -65,18 +58,13 @@ graph TD
     C1 --> C11
 
     A31[segment_nuclei_<br>in_time] --> A14 & A01
-    A32[mask_nuclear_<br>image_for_ilastic] --> A31 & C11 & A01
-    A33[predict_nucleoli] --> A32 & A02 & A01
-    A34[conver_tiff_<br>to_ometif] --> A33 & A01
-    A35[segment_<br>nucleoplasm] --> A31 & A34 & A01
     A2 --> A31
-    A3 --> A31 & A35
 
-    A41[measure] --> C11 & A31 & A35 & A01
+    A41[measure] --> C11 & A31 & A01
     A42[combine_<br>measurements] --> A41 & A01
     A4 --> A42
 
-    A51[normalize_<br>singlechannel] --> A14 & A31 & A35 & A01
+    A51[normalize_<br>singlechannel] --> A14 & A31 & A01
     A52[normalize_<br>multichannel] --> A51 & A01
     A5 --> A51 & A52
 
@@ -86,11 +74,12 @@ graph TD
 
 
     A81[msnd] --> A62 & A52 & A31 & A01
-    A8 --> A81
+    A82[msnf] --> A62 & A52 & A31 & A01
+    A8 --> A81 & A82
 
 
-    A91[fit_msnd_line] --> A81
-    A92[instantaneous_alphas] --> A81
+    A91[fit_msnd_line] --> A81 & A82
+    A92[instantaneous_alphas] --> A81 & A82
     A9 --> A91 & A92
 
     B11{sn_crop_roi} --> A12

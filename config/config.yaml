@@ -45,11 +45,6 @@ parse_metadata:
   verbose: True
   patch: True
 
-build_imagelist:
-  nafilter: strict
-  patch: True
-  verbose: True
-
 # 1. channels has to be in the order as how they have been specified 
 #    in 'input' module above.
 # 2. if you don't specify all the channels from the movies, those 
@@ -72,18 +67,9 @@ segment_nuclei_in_time:
 normalize:
   structure:
     - nucleus
-    # - nucleoplasm
   method: zscore
   # nested as dict. leave it empty if not needed
   method_kwargs:
-
-normalize_intensity:
-  background: 100
-
-# THIS IS NOT USED FOR DATASET WITHOUT BFP RECORDED IN MOVIE
-# predict_nucleoli:
-#   channel: BFP
-#   model_name: u2os_nucleoli_bfp_v1
 
 sn:
   predict_nucleoli:

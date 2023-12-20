@@ -32,6 +32,13 @@ def sn_get_checkpoint_RoiUID(wildcards):
 
 
 rule sn_mask_tiff:
+    """
+    Note that I cannot get ilastik to open `.ome.tif` files created by
+    aicsimageio's OmeTiffWriter, and have to use tifffile to save as 
+    ImageJ-compatible `.tif` files. This is rather annoying but doesn't 
+    add any complexity yet (maybe something to solve if relying on OME
+    metadata).
+    """
     input:
         image="results/sn/image/multi_ch/{RoiUID}.ome.tif",
         mask="results/segmentation/nucleus/{RoiUID}.ome.tif",
