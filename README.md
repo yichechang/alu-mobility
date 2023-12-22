@@ -92,6 +92,15 @@ graph TD
 
 ## Dependencies
 
+### git submodules
+This repo uses git submodules to manage some dependencies. To clone this
+repo, use the following command:
+
+```
+git clone --recurse-submodules https://github.com/yichechang/alu-mobility.git
+```
+
+### others
 Dependencies are listed in [workflow/envs/abcdcs.yaml](workflow/envs/abcdcs.yaml) 
 file and can be installed as a conda environment using either conda or
 mamba. 
@@ -105,10 +114,10 @@ mamba create -n abcdcs
 mamba env update -n abcdcs -f workflow/envs/abcdcs.yaml
 ```  
 
-### wget
+#### wget
 
 
-### ilastik
+#### ilastik
 Install manually before the first run. 
 
 ```
@@ -120,7 +129,7 @@ mamba install -c ilastik-forge ilastik
 **TODO**: add to conda environment for snakemake to create this on the 
 first run.
 
-### MATLAB
+#### MATLAB
 
 You'll need to have `matlab` on your path. This can either be done by 
 manually creating a symbolic link to the matlab executable, or by using
