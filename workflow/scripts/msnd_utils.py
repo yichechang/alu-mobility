@@ -1,5 +1,7 @@
 from typing import List, Tuple, Optional, Union, Dict, Callable, Any
 
+from functools import partial
+
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -7,27 +9,6 @@ from xarray import DataArray, Dataset
 from skimage.filters import gaussian
 
 from abcdcs import imageop, loadpiv, pivop, msnd
-
-
-def _read_data(
-        image_path: str,
-        nucmask_path: str,
-        npmask_path: str,
-        piv_path: str,
-        chnames: List[str],
-) -> Tuple:
-    """
-    Load image and mask from a single nucleus.
-    """
-    image = imageop.Image.read(
-        image_path, 'DataArray', chnames, squeeze=True)
-    nucmask = imageop.Mask.read(nucmask_path, 'DataArray',
-                                squeeze=True, drop_single_C=True)
-    npmask = imageop.Mask.read(npmask_path, 'DataArray',
-                               squeeze=True, drop_single_C=True)
-    piv = loadpiv.read_matpiv(piv_path)
-    return image, nucmask, npmask, piv
-
 
 def _blur_image(image: DataArray, sigma: float = 0.5
                 ) -> DataArray:
@@ -39,6 +20,44 @@ def _blur_image(image: DataArray, sigma: float = 0.5
         vectorize=True,
         kwargs={'sigma': sigma}
     )
+
+class DataReader:
+    """
+    Parameters
+    ----------
+    data_name_and_paths: dict
+        snakemake.input
+    data_configs: dict
+        the "data" block in rule msnd's config.
+        key = name. value = dict(path_pattern=..., type=...)
+    chnames: list[str]
+    """
+    def __init__(self, data_name_and_paths, data_configs, chnames):
+        self._name_and_paths = data_name_and_paths
+        self._configs = data_configs
+        self._chnames = chnames
+
+    def _data_type_to_func(self, data_type):
+        mapping = {
+            "image":
+                partial(imageop.Image.read,
+                        fmt="DataArray", channel_names=self._chnames, squeeze=True),
+            "mask":
+                partial(imageop.Mask.read,
+                        fmt="DataArray", squeeze=True, drop_single_C=True),
+            "piv":
+                loadpiv.read_matpiv,
+        }
+        return mapping[data_type]
+
+    def read(self):
+        data = {}
+        for name,path in self._name_and_paths.items():
+            data_type = self._configs[name]['type']
+            data_reader = self._data_type_to_func(data_type)
+            data[name] = data_reader(path)
+
+        return data
 
 
 class PreprocessStepHandler:
