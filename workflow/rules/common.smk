@@ -17,7 +17,6 @@ wildcard_constraints:
     ch = "[\w-]+",
     protocol = "[\w-]+",
     structure = "[\w-]+",
-    msnd_type = "[\w-]+",
     msnd_protocol = "[\w-]+",
 
 def get_channel_info():

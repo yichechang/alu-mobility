@@ -1,8 +1,8 @@
 rule fit_msnd_line:
     input:
-        msnd="results/{msnd_type}/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_stats.csv",
+        msnd="results/msnd/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_stats.csv",
     output:
-        csv="results/fit_msnd/{msnd_type}/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_fitparams.csv"
+        csv="results/msnd_post/powerlaw/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_fitparams.csv"
     run:
         import numpy as np
         import pandas as pd
@@ -46,9 +46,9 @@ rule fit_msnd_line:
 
 rule instantaneous_alphas:
     input:
-        msnd="results/{msnd_type}/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_indiv.csv",
+        msnd="results/msnd/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_indiv.csv",
     output:
-        csv="results/insta_alpha/{msnd_type}/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_alphas.csv"
+        csv="results/msnd_post/insta_alpha/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_alphas.csv"
     run:
         import numpy as np
         import pandas as pd
@@ -79,21 +79,19 @@ rule instantaneous_alphas:
         alphas.to_csv(output.csv, index=False)
 
 
-all_msnd_alpha_input = [
+all_msnd_post_input = [
     lambda w: expand(
-        "results/fit_msnd/{msnd_type}/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_fitparams.csv",
-        msnd_type=['msnd', 'msnf'],
+        "results/msnd_post/powerlaw/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_fitparams.csv",
         protocol=ALL_PROTOCOLS,
         ch=config['msnd_alpha']['channel'],
-        msnd_protocol=['normal', 'eachlevel'],
+        msnd_protocol=ALL_MSND_PROTOCOLS,
         RoiUID=get_checkpoint_RoiUID(w)
     ),
     lambda w: expand(
-        "results/insta_alpha/{msnd_type}/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_alphas.csv",
-        msnd_type=['msnd', 'msnf'],
+        "results/msnd_post/insta_alpha/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_alphas.csv",
         protocol=ALL_PROTOCOLS,
         ch=config['msnd_alpha']['channel'],
-        msnd_protocol=['normal', 'eachlevel'],
+        msnd_protocol=ALL_MSND_PROTOCOLS,
         RoiUID=get_checkpoint_RoiUID(w)
     )
 ]

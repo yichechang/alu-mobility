@@ -315,13 +315,19 @@ msnd_alpha:
     - miRFP670
     - sfGFP
   groupby:
-    normal: 
-    eachlevel:
+    normal_0d:
+    eachlevel_1d:
       - channel
       - level
+    eachlevel_2d:
+    eachlevel_2d_fluctuation:
   min_size:
-    normal: 10
-    eachlevel: 30
+    normal_0d: 10
+    eachlevel_1d: 30
+    eachlevel_2d: 10
+    eachlevel_2d_fluctuation: 10
   min_npoints:
-    normal: #leave blanck
-    eachlevel: 5
+    normal_0d: #leave blank
+    eachlevel_1d: 5
+    eachlevel_2d: 5
+    eachlevel_2d_fluctuation: 5
