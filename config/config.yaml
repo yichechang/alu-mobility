@@ -105,11 +105,45 @@ piv:
           PKH: 0.3
           GLOBAL: 3
 
+# ----------------------------------------------------------------
+# MSND analysis
+#
+# For the "protocols" block, each item corresponds to a specific
+# MSND analysis protocol, including input data names and filename
+# patterns, preprocessing steps, and MSND type (0-, 1-, 2-d).
+#
+# Make sure to also update configs for msnd_post rule below for
+# each of the protocol specified in this block.
+# ----------------------------------------------------------------
 msnd:
+  # Source movie's channel which PIV generated from
   channel:
     - miRFP670
     - sfGFP
+
+  # Each protocol contains "data", "preprocess", and "process" blocks
+  # - For data, each item is a dict
+  #   <name>:                  # becomes key in data (i.e., data[<name>])
+  #      path: <path pattern>  # including wildcards pattern
+  #                            # if left blank, will try to use default
+  #      type: <type>          # determines how to read data in
+  # - For preprocess, each item is a dict
+  #   name: <name>             # a descriptive name, not used in code
+  #   input: <input_name>      # refers to data[<input_name>]. possible
+  #                            # options depend on those defined in "data"
+  #   output: <output_name>    # can be referred to in a later preprocess
+  #                            # for image and piv, make sure to name the
+  #                            # last one *_final
+  #   steps:                   # list of dict
+  #     - func: <data_type>_<func_name> # see msnd_utils.py for options
+  #       params:              # dict of dict
+  #                            # for params to be passed as kwargs
+  # - For process,
+  #   name: <name>             # possible options now: 0d, 1d, 2d
+  #   params:                  # dict of dict
+  #                            # for params to be passed as kwargs
   protocols:
+    # regular over all nucleoplasmic pixels
     normal_0d:
       data: # relative to project dir
         piv:
@@ -156,6 +190,8 @@ msnd:
       process:
         name: 0d
         params:
+
+    # 1D intensity-binned
     eachlevel_1d:
       data: # relative to project dir
         piv:
@@ -206,6 +242,8 @@ msnd:
             - -3.5
             - 3.5
             - 0.25
+
+    # 2D intensity-binned
     eachlevel_2d:
       data: # relative to project dir
         piv:
@@ -256,6 +294,8 @@ msnd:
             - -3.5
             - 3.5
             - 0.25
+
+    # 2D intensity-binned. using fluctuation instead of raw displacement
     eachlevel_2d_fluctuation:
       data: # relative to project dir
         piv:
@@ -310,6 +350,13 @@ msnd:
             - 3.5
             - 0.25
 
+
+# ----------------------------------------------------------------
+# MSND post-analysis
+#
+# Make sure to also update configs for each of the protocol used
+# in msnd block
+# ----------------------------------------------------------------
 msnd_post:
   channel:
     - miRFP670
