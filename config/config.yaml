@@ -310,7 +310,7 @@ msnd:
             - 3.5
             - 0.25
 
-msnd_alpha:
+msnd_post:
   channel:
     - miRFP670
     - sfGFP
