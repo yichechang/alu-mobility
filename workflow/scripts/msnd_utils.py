@@ -197,11 +197,13 @@ class MSNDStepFuncHandler:
             bins: np.ndarray,
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         if 'C' in byimage.dims:
-            stats = indiv = []
-            for c in byimage.coords['C']:
+            stats = []
+            indiv = []
+            for c in byimage.coords['C'].values:
                 _stats, _indiv = MSNDStepFuncHandler._msnd_eachlevel(
                     MSNDobj, byimage=byimage.sel(C=c), bins=bins)
-                _stats['channel'] = _indiv['channel'] = c
+                _stats['channel'] = c
+                _indiv['channel'] = c
                 stats.append(_stats)
                 indiv.append(_indiv)
             return (pd.concat(stats, ignore_index=True),
