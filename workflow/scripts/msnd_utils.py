@@ -1,5 +1,6 @@
 from typing import List, Tuple, Optional, Union, Dict, Callable, Any
 
+import warnings
 from functools import partial
 
 import numpy as np
@@ -351,5 +352,7 @@ class MSNDPipeline:
         msnd_func, msnd_params = MSNDStepHandler(self._msnd_step)()
         data = self._data
         MSND = msnd.MSND(data["piv_final"], components=('u', 'v'))
-        self._result = msnd_func(MSND, byimage=data["image_final"], **msnd_params)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            self._result = msnd_func(MSND, byimage=data["image_final"], **msnd_params)
         self._processed = True
