@@ -16,7 +16,7 @@ include: "rules/measure.smk"
 include: "rules/normalize.smk"
 include: "rules/piv.smk"
 include: "rules/msnd.smk"
-include: "rules/extract_alpha.smk"
+include: "rules/msnd_post.smk"
 
 
 # -------------------------------------
@@ -40,7 +40,8 @@ rule all:
         [
             all_roi_input,
             all_piv_input,
-            all_msnd_alpha_input,
+            all_msnd_input,
+            all_msnd_post_input,
             all_measure_input,
             all_segment_nucleoli_input,
         ]
@@ -72,8 +73,5 @@ rule all_piv:
 rule all_msnd:
     input: all_msnd_input
 
-rule all_msnf:
-    input: all_msnf_input
-
-rule all_msnd_alpha:
-    input: all_msnd_alpha_input
+rule all_msnd_post:
+    input: all_msnd_post_input

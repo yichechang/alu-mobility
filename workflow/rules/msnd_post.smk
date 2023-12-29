@@ -1,8 +1,8 @@
 rule fit_msnd_line:
     input:
-        msnd="results/{msnd_type}/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_stats.csv",
+        msnd="results/msnd/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_stats.csv",
     output:
-        csv="results/fit_msnd/{msnd_type}/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_fitparams.csv"
+        csv="results/msnd_post/powerlaw/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_fitparams.csv"
     run:
         import numpy as np
         import pandas as pd
@@ -28,15 +28,15 @@ rule fit_msnd_line:
             )
             return fit
         
-        min_size = config['msnd_alpha']['min_size'][wildcards.msnd_protocol]
+        min_size = config['msnd_post']['min_size'][wildcards.msnd_protocol]
         df = pd.read_csv(input.msnd).dropna().query('size >= @min_size')
         df['log_lag_s'] = np.log10(df['lag_s'])
         df['log_mean'] = np.log10(df['mean'])
 
-        by = config['msnd_alpha']['groupby'][wildcards.msnd_protocol]
+        by = config['msnd_post']['groupby'][wildcards.msnd_protocol]
         if by is not None:
             df['npoints'] = df.groupby(by)['mean'].transform('count')
-            min_npoints = config['msnd_alpha']['min_npoints'][wildcards.msnd_protocol]
+            min_npoints = config['msnd_post']['min_npoints'][wildcards.msnd_protocol]
             fit = df.query('npoints > @min_npoints').groupby(by).apply(_curve_fit).reset_index()
         else:
             fit = _curve_fit(df).to_frame().T
@@ -46,9 +46,9 @@ rule fit_msnd_line:
 
 rule instantaneous_alphas:
     input:
-        msnd="results/{msnd_type}/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_indiv.csv",
+        msnd="results/msnd/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_indiv.csv",
     output:
-        csv="results/insta_alpha/{msnd_type}/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_alphas.csv"
+        csv="results/msnd_post/insta_alpha/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_alphas.csv"
     run:
         import numpy as np
         import pandas as pd
@@ -69,7 +69,7 @@ rule instantaneous_alphas:
         
         df = pd.read_csv(input.msnd).dropna()
 
-        by = config['msnd_alpha']['groupby'][wildcards.msnd_protocol]
+        by = config['msnd_post']['groupby'][wildcards.msnd_protocol]
         if by is not None:
             alphas = df.groupby(by).apply(compute_instantaneous_alpha).reset_index()
         else:
@@ -79,21 +79,19 @@ rule instantaneous_alphas:
         alphas.to_csv(output.csv, index=False)
 
 
-all_msnd_alpha_input = [
+all_msnd_post_input = [
     lambda w: expand(
-        "results/fit_msnd/{msnd_type}/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_fitparams.csv",
-        msnd_type=['msnd', 'msnf'],
+        "results/msnd_post/powerlaw/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_fitparams.csv",
         protocol=ALL_PROTOCOLS,
-        ch=config['msnd_alpha']['channel'],
-        msnd_protocol=['normal', 'eachlevel'],
+        ch=config['msnd_post']['channel'],
+        msnd_protocol=ALL_MSND_PROTOCOLS,
         RoiUID=get_checkpoint_RoiUID(w)
     ),
     lambda w: expand(
-        "results/insta_alpha/{msnd_type}/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_alphas.csv",
-        msnd_type=['msnd', 'msnf'],
+        "results/msnd_post/insta_alpha/{protocol}/{ch}/{msnd_protocol}/{RoiUID}_alphas.csv",
         protocol=ALL_PROTOCOLS,
-        ch=config['msnd_alpha']['channel'],
-        msnd_protocol=['normal', 'eachlevel'],
+        ch=config['msnd_post']['channel'],
+        msnd_protocol=ALL_MSND_PROTOCOLS,
         RoiUID=get_checkpoint_RoiUID(w)
     )
 ]
