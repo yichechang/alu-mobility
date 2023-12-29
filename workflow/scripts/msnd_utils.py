@@ -173,7 +173,9 @@ class PreprocessPipe:
 class MSNDStepFuncHandler:
     @staticmethod
     def _msnd_normal(
-            MSNDobj: msnd.MSND
+            MSNDobj: msnd.MSND,
+            *,
+            byimage = None,
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         return MSNDobj.calculate('normal')
 
@@ -186,6 +188,28 @@ class MSNDStepFuncHandler:
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         return MSNDobj.calculate('eachlevel',
                                  byimage=byimage, bins=bins)
+
+    @staticmethod
+    def _msnd_eachlevel1d(
+            MSNDobj: msnd.MSND,
+            *,
+            byimage: DataArray,
+            bins: np.ndarray,
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        if 'C' in byimage.dims:
+            stats = indiv = []
+            for c in byimage.coords['C']:
+                _stats, _indiv = MSNDStepFuncHandler._msnd_eachlevel(
+                    MSNDobj, byimage=byimage.sel(C=c), bins=bins)
+                _stats['channel'] = _indiv['channel'] = c
+                stats.append(_stats)
+                indiv.append(_indiv)
+            return (pd.concat(stats, ignore_index=True),
+                    pd.concat(indiv, ignore_index=True))
+        else:
+            return MSNDStepFuncHandler._msnd_eachlevel(
+                MSNDobj, byimage=byimage, bins=bins)
+
 
     @staticmethod
     def _msnd_eachlevel2d(
@@ -201,7 +225,7 @@ class MSNDStepFuncHandler:
     def __call__(step_func) -> Callable[..., Tuple[pd.DataFrame, pd.DataFrame]]:
         _mapping = {
             '0d': MSNDStepFuncHandler._msnd_normal,
-            '1d': MSNDStepFuncHandler._msnd_eachlevel,
+            '1d': MSNDStepFuncHandler._msnd_eachlevel1d,
             '2d': MSNDStepFuncHandler._msnd_eachlevel2d,
         }
         return _mapping[step_func]
@@ -235,12 +259,13 @@ class MSNDStepParamsHandler:
         }
 
         processed_params = {}
-        for param, val in step_params.items():
-            if param in mapping[step_func]:
-                proc = mapping[step_func][param]
-                processed_params.update(proc(val))
-            else:
-                processed_params.update({param: val})
+        if step_params is not None:
+            for param, val in step_params.items():
+                if param in mapping[step_func]:
+                    proc = mapping[step_func][param]
+                    processed_params.update(proc(val))
+                else:
+                    processed_params.update({param: val})
 
         return processed_params
 

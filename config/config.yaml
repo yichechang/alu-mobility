@@ -110,7 +110,103 @@ msnd:
     - miRFP670
     - sfGFP
   protocols:
-    eachlevel_2d_new:
+    normal_0d:
+      data: # relative to project dir
+        piv:
+          path:
+          type: piv
+        mask_nuc:
+          path:
+          type: mask
+        mask_np:
+          path:
+          type: mask
+        image:
+          path: "results/image_normalized/by_nucleus/multi_ch/{RoiUID}.ome.tif"
+          type: image
+      preprocess:
+        - name: blur_image
+          input: image
+          output: image_final
+          steps:
+            - func: image_blur
+              params:
+                sigma: 0.5
+        - name: shrink_nucleus
+          input: mask_nuc
+          output: mask_nuc_inner
+          steps:
+            - func: mask_erode_by_disk
+              params:
+                radius: 15
+        - name: filter_piv
+          input: piv
+          output: piv_final
+          steps:
+            - func: piv_mask_filter
+              params:
+                _mask: mask_nuc_inner
+            - func: piv_mask_filter
+              params:
+                _mask: mask_np
+            - func: piv_global_filter
+              params:
+                components: [ 'u', 'v' ]
+                max: 4
+      process:
+        name: 0d
+        params:
+    eachlevel_1d:
+      data: # relative to project dir
+        piv:
+          path:
+          type: piv
+        mask_nuc:
+          path:
+          type: mask
+        mask_np:
+          path:
+          type: mask
+        image:
+          path: "results/image_normalized/by_nucleus/multi_ch/{RoiUID}.ome.tif"
+          type: image
+      preprocess:
+        - name: blur_image
+          input: image
+          output: image_final
+          steps:
+            - func: image_blur
+              params:
+                sigma: 0.5
+        - name: shrink_nucleus
+          input: mask_nuc
+          output: mask_nuc_inner
+          steps:
+            - func: mask_erode_by_disk
+              params:
+                radius: 15
+        - name: filter_piv
+          input: piv
+          output: piv_final
+          steps:
+            - func: piv_mask_filter
+              params:
+                _mask: mask_nuc_inner
+            - func: piv_mask_filter
+              params:
+                _mask: mask_np
+            - func: piv_global_filter
+              params:
+                components: [ 'u', 'v' ]
+                max: 4
+      process:
+        name: 1d
+        params:
+          bins_args:
+            - -3.5
+            - 3.5
+            - 0.25
+    eachlevel_2d:
       data: # relative to project dir
         piv:
           path:
