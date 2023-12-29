@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 # ======================================================================
 # wildcards
@@ -17,6 +18,7 @@ wildcard_constraints:
     protocol = "[\w-]+",
     structure = "[\w-]+",
     msnd_type = "[\w-]+",
+    msnd_protocol = "[\w-]+",
 
 def get_channel_info():
     import pandas as pd
@@ -31,7 +33,7 @@ ALL_CH = CINFO['fluoro']
 
 # TODO: Move to config
 ALL_PROTOCOLS = ['matpiv_v2']
-ALL_MSND_PROTOCOLS = ["normal", "eachlevel", "eachlevel2d"]
+ALL_MSND_PROTOCOLS = [protocol for protocol in config['msnd']['protocols']]
 
 def get_imageset_files(wildcards):
     files = []

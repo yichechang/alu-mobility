@@ -110,19 +110,19 @@ msnd:
     - miRFP670
     - sfGFP
   protocols:
-    eachlevel_2d:
+    eachlevel_2d_new:
       data: # relative to project dir
         piv:
-          path: 'results/piv/{protocol}/{ch}/{RoiUID}.mat'
+          path:
           type: piv
         mask_nuc:
-          path: 'results/...'
+          path:
           type: mask
         mask_np:
-          path: 'results/...'
+          path:
           type: mask
         image:
-          path: 'results/...'
+          path: "results/image_normalized/by_nucleus/multi_ch/{RoiUID}.ome.tif"
           type: image
       preprocess:
         - name: blur_image

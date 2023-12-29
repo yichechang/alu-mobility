@@ -10,5 +10,5 @@ msnd = MSNDPipeline(data, protocol['preprocess'], protocol['process'])
 df_stat, df_raw = msnd.calculate()
 
 # save outputs
-df_stat.to_csv(snakemake.output['stat'], index=False)
-df_stat.to_csv(snakemake.output['raw'], index=False)
+df_stat.to_csv(snakemake.output['stats'], index=False)
+df_stat.to_csv(snakemake.output['indiv'], index=False)
