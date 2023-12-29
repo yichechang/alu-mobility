@@ -40,6 +40,7 @@ rule all:
         [
             all_roi_input,
             all_piv_input,
+            all_msnd_input,
             all_msnd_alpha_input,
             all_measure_input,
             all_segment_nucleoli_input,
@@ -71,9 +72,6 @@ rule all_piv:
 
 rule all_msnd:
     input: all_msnd_input
-
-rule all_msnf:
-    input: all_msnf_input
 
 rule all_msnd_alpha:
     input: all_msnd_alpha_input

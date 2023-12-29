@@ -81,6 +81,7 @@ class PreprocessStepHandler:
             "piv": {
                 'mask_filter': pivop.mask_filter,
                 'global_filter': pivop.global_filter,
+                'to_fluctuation': pivop.to_fluctuation,
             },
             "mask": {
                 'erode_by_disk': imageop.Mask.erode_by_disk,
