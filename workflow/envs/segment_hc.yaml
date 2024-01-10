@@ -1,0 +1,12 @@
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - numpy
+  - xarray
+  - scikit-image
+  - bioformats_jar
+  - pip
+  - pip:
+    - aicsimageio[nd2, czi]
+    - 'git+https://github.com/yichechang/alu-mobility.git@v0.1.0#egg=abcdcs&subdirectory=abcdcs'

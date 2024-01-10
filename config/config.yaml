@@ -64,6 +64,15 @@ segment_nuclei_in_time:
   diameter: 300
   downsample: 10
 
+segment_hc:
+  channel: miRFP670
+  hc:
+    blur_sigma: 1.0
+    zscore_threshold: 2.0
+    clean_disk_size: 2
+    clean_min_size: 50
+    time_threshold: 0.5
+
 normalize:
   structure:
     - nucleus
