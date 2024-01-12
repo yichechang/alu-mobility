@@ -3,7 +3,7 @@ def get_input_from_rule_outputs(input_type):
     mapping = {
         "piv": {"rule": "piv", "key": 0},
         "mask_nuc": {"rule": "segment_nuclei_in_time", "key": 0},
-        "mask_np": {"rule": "sn_convert_to_ometif", "key": 0},
+        "mask_np": {"rule": "sn_segment_nucleoplasm", "key": 0},
     }
     rule_name = mapping[input_type]["rule"]
     output_key = mapping[input_type]["key"]
