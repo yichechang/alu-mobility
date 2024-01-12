@@ -22,6 +22,10 @@ def _blur_image(image: DataArray, sigma: float = 0.5
         kwargs={'sigma': sigma}
     )
 
+def _piv_mask_to_remove(image, mask):
+    comp = mask == 0
+    return pivop.mask_filter(image, mask=comp)
+
 class DataReader:
     """
     Parameters
@@ -80,11 +84,13 @@ class PreprocessStepHandler:
         mapping = {
             "piv": {
                 'mask_filter': pivop.mask_filter,
+                'mask_remove': _piv_mask_to_remove,
                 'global_filter': pivop.global_filter,
                 'to_fluctuation': pivop.to_fluctuation,
             },
             "mask": {
                 'erode_by_disk': imageop.Mask.erode_by_disk,
+                'dilate_by_disk': imageop.Mask.dilate_by_disk,
             },
             "image": {
                 'blur': _blur_image,

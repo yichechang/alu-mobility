@@ -13,10 +13,6 @@ TODO: Update workflow diagram to be data-centric instead of rule-centric
 
 ```mermaid
 graph TD
-    subgraph analysis
-    A(((Analysis)))
-    end
-    A(((Analysis))) --> B14 & B15 & A91 & A92 & A81 & A52 & A31 & A42
 
     subgraph initialize
     A99((all_init))
@@ -24,6 +20,24 @@ graph TD
 
     subgraph interactive rules
     A98((all_<br>interactive))
+    end
+
+    subgraph segmentation
+    A2
+    B1
+    B2
+    end
+
+    subgraph piv analyis
+    A6
+    A8
+    A9
+    end
+
+    subgraph image processing
+    A1
+    A4
+    A5
     end
 
     A1((all_roi))
@@ -41,7 +55,8 @@ graph TD
     A9((all_msnd_post))
 
     B1((all_<br>segmentation_<br>nucleoli))    
-
+    B2((all_<br>segmentation_<br>hc))
+  
     A01[config_template]
     A99 --> A01
 
@@ -73,7 +88,7 @@ graph TD
     A6 --> A62
 
 
-    A81[msnd] --> A62 & A52 & A31 & A01
+    A81[msnd] --> A62 & A52 & A31 & B15 & B21 & A01
     A8 --> A81
 
 
@@ -87,6 +102,9 @@ graph TD
     B14[sn_convert_<br>to_ometif] --> B13
     B15[sn_segment_<br>nucleoplasm] --> B14 & A31
     B1 --> B14 & B15
+
+    B21[segment_hc] --> A52 & A01
+    B2 --> B21
 ```
 
 ## Dependencies

@@ -1,0 +1,21 @@
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - numpy
+  - xarray
+  - scikit-image
+  # Caution: Snakemake's --use-conda can cause issues due to nested 
+  # conda environments. Rule-specific environments might revert to 
+  # environment where Snakemake runs, breaking compatibility with 
+  # compiled code tied to specific Python versions.
+  # Due to this issue, the following two packages need to be
+  # treated as direct dependencies. 
+  - pooch           # optional dep of scikit-image
+  - paramiko        # optional dep of pooch.
+                    # paramiko is actually a indirect dep of snakemake
+  - bioformats_jar
+  - pip
+  - pip:
+    - aicsimageio[nd2, czi]
+    - 'git+https://github.com/yichechang/alu-mobility.git@v0.1.0#egg=abcdcs&subdirectory=abcdcs'

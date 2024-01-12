@@ -64,6 +64,15 @@ segment_nuclei_in_time:
   diameter: 300
   downsample: 10
 
+segment_hc:
+  channel: miRFP670
+  hc:
+    blur_sigma: 1.0
+    zscore_threshold: 2.0
+    clean_disk_size: 2
+    clean_min_size: 50
+    time_threshold: 0.5
+
 normalize:
   structure:
     - nucleus
@@ -286,6 +295,195 @@ msnd:
             - func: piv_global_filter
               params:
                 components: ['u', 'v']
+                max: 4
+      process:
+        name: 2d
+        params:
+          bins_args:
+            - -3.5
+            - 3.5
+            - 0.25
+
+    # nucleoli and heterochromatin excluded
+    euchromatin_0d:
+      data: # relative to project dir
+        piv:
+          path:
+          type: piv
+        mask_nuc:
+          path:
+          type: mask
+        mask_np:
+          path:
+          type: mask
+        mask_hc:
+          path: "results/segmentation/hc/{RoiUID}.ome.tif"
+          type: mask
+        image:
+          path: "results/image_normalized/by_nucleus/multi_ch/{RoiUID}.ome.tif"
+          type: image
+      preprocess:
+        - name: blur_image
+          input: image
+          output: image_final
+          steps:
+            - func: image_blur
+              params:
+                sigma: 0.5
+        - name: shrink_nucleus
+          input: mask_nuc
+          output: mask_nuc_inner
+          steps:
+            - func: mask_erode_by_disk
+              params:
+                radius: 15
+        - name: expand_hc
+          input: mask_hc
+          output: mask_hc_expanded
+          steps:
+            - func: mask_dilate_by_disk
+              params:
+                radius: 3
+        - name: filter_piv
+          input: piv
+          output: piv_final
+          steps:
+            - func: piv_mask_filter
+              params:
+                _mask: mask_nuc_inner
+            - func: piv_mask_filter
+              params:
+                _mask: mask_np
+            - func: piv_mask_remove
+              params:
+                _mask: mask_hc_expanded
+            - func: piv_global_filter
+              params:
+                components: [ 'u', 'v' ]
+                max: 4
+      process:
+        name: 0d
+        params:
+
+    euchromatin_1d:
+      data: # relative to project dir
+        piv:
+          path:
+          type: piv
+        mask_nuc:
+          path:
+          type: mask
+        mask_np:
+          path:
+          type: mask
+        mask_hc:
+          path: "results/segmentation/hc/{RoiUID}.ome.tif"
+          type: mask
+        image:
+          path: "results/image_normalized/by_nucleus/multi_ch/{RoiUID}.ome.tif"
+          type: image
+      preprocess:
+        - name: blur_image
+          input: image
+          output: image_final
+          steps:
+            - func: image_blur
+              params:
+                sigma: 0.5
+        - name: shrink_nucleus
+          input: mask_nuc
+          output: mask_nuc_inner
+          steps:
+            - func: mask_erode_by_disk
+              params:
+                radius: 15
+        - name: expand_hc
+          input: mask_hc
+          output: mask_hc_expanded
+          steps:
+            - func: mask_dilate_by_disk
+              params:
+                radius: 3
+        - name: filter_piv
+          input: piv
+          output: piv_final
+          steps:
+            - func: piv_mask_filter
+              params:
+                _mask: mask_nuc_inner
+            - func: piv_mask_filter
+              params:
+                _mask: mask_np
+            - func: piv_mask_remove
+              params:
+                _mask: mask_hc_expanded
+            - func: piv_global_filter
+              params:
+                components: [ 'u', 'v' ]
+                max: 4
+      process:
+        name: 1d
+        params:
+          bins_args:
+            - -3.5
+            - 3.5
+            - 0.25
+    
+    euchromatin_2d:
+      data: # relative to project dir
+        piv:
+          path:
+          type: piv
+        mask_nuc:
+          path:
+          type: mask
+        mask_np:
+          path:
+          type: mask
+        mask_hc:
+          path: "results/segmentation/hc/{RoiUID}.ome.tif"
+          type: mask
+        image:
+          path: "results/image_normalized/by_nucleus/multi_ch/{RoiUID}.ome.tif"
+          type: image
+      preprocess:
+        - name: blur_image
+          input: image
+          output: image_final
+          steps:
+            - func: image_blur
+              params:
+                sigma: 0.5
+        - name: shrink_nucleus
+          input: mask_nuc
+          output: mask_nuc_inner
+          steps:
+            - func: mask_erode_by_disk
+              params:
+                radius: 15
+        - name: expand_hc
+          input: mask_hc
+          output: mask_hc_expanded
+          steps:
+            - func: mask_dilate_by_disk
+              params:
+                radius: 3
+        - name: filter_piv
+          input: piv
+          output: piv_final
+          steps:
+            - func: piv_mask_filter
+              params:
+                _mask: mask_nuc_inner
+            - func: piv_mask_filter
+              params:
+                _mask: mask_np
+            - func: piv_mask_remove
+              params:
+                _mask: mask_hc_expanded
+            - func: piv_global_filter
+              params:
+                components: [ 'u', 'v' ]
                 max: 4
       process:
         name: 2d
