@@ -22,8 +22,7 @@ rule segment_hc:
             "results/image_normalized/by_nucleus/multi_ch/{RoiUID}.ome.tif",
             ch=config['segment_hc']['channel'],
             allow_missing=True
-        ),
-        mask="results/segmentation/nucleus/{RoiUID}.ome.tif",
+        )
     output:
         "results/segmentation/hc/{RoiUID}.ome.tif"
     params:

@@ -7,9 +7,8 @@ from skimage import filters, morphology
 from aicsimageio.writers.ome_tiff_writer import OmeTiffWriter
 from abcdcs import imageop
 
-def main(image_path, mask_path, output_path):
+def main(image_path, output_path):
     image = load_image(image_path)
-    # nuc = load_mask(mask_path)
 
     # segment heterochromatin
     # end result does not contain time dimension
@@ -18,17 +17,10 @@ def main(image_path, mask_path, output_path):
     opened = morphological_opening(thresholded, disk_size=PARAMS["hc"]["clean_disk_size"])
     cleaned = remove_small_objects(opened, min_size=PARAMS["hc"]["clean_min_size"])
     hc = threshold_across_time(cleaned, threshold=PARAMS["hc"]["time_threshold"])
-    
-    # segment euchromatin by removing heterochromatin from
-    # nuclear mask
-    # hc_dilated = imageop.Mask.erode_by_disk(hc, radius=PARAMS["ec"]["hc_dilate_disk_size"])
-    # ec = imageop.Image.mask_to_keep(nuc, hc_dilated==0)
 
     # save as uint8 images
     hc = hc.rename("heterochromatin").astype(np.uint8)
-    # ec = ec.rename("euchromatin").astype(np.uint8)
     OmeTiffWriter.save(hc.data, output_path, dim_order="YX")
-    # OmeTiffWriter.save(ec.data, output_path["ec"], dim_order="YX")
 
 def load_image(file_path):
     return (
@@ -78,14 +70,6 @@ def morphological_opening(image, disk_size: int = 1):
 
 
 @apply_ufunc_simple_by_plane
-def dilate_objects(image, disk_size: int = 1):
-    if disk_size == 0:
-        disk = None
-    else:
-        disk = morphology.disk(disk_size)
-    return morphology.binary_dilation(image, disk)
-
-@apply_ufunc_simple_by_plane
 def remove_small_objects(image, min_size: int = 20):
     return morphology.remove_small_objects(image, min_size)
 
@@ -125,4 +109,4 @@ if __name__ == "__main__":
     PARAMS = snakemake.params
     INPUT = snakemake.input
     OUTPUT = snakemake.output
-    main(INPUT["image"][0], INPUT["mask"][0], OUTPUT[0])
+    main(INPUT["image"][0], OUTPUT[0])

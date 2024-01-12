@@ -103,7 +103,7 @@ graph TD
     B15[sn_segment_<br>nucleoplasm] --> B14 & A31
     B1 --> B14 & B15
 
-    B21[segment_hc] --> A52 & A31 & A01
+    B21[segment_hc] --> A52 & A01
     B2 --> B21
 ```
 
