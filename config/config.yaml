@@ -677,6 +677,11 @@ msnd_post:
       - channel
       - level
     eachlevel_2d_fluctuation:
+    euchromatin_0d:
+    euchromatin_1d:
+      - channel
+      - level
+    euchromatin_2d:
   min_size:
     normal_0d: 10
     eachlevel_1d: 30
@@ -684,6 +689,9 @@ msnd_post:
     normal_0d_fluctuation: 10
     eachlevel_1d_fluctuation: 30
     eachlevel_2d_fluctuation: 10
+    euchromatin_0d: 10
+    euchromatin_1d: 30
+    euchromatin_2d: 10
   min_npoints:
     normal_0d: #leave blank
     eachlevel_1d: 5
@@ -691,3 +699,6 @@ msnd_post:
     normal_0d_fluctuation: #leave blank
     eachlevel_1d_fluctuation: 5
     eachlevel_2d_fluctuation: 5
+    euchromatin_0d: #leave blank
+    euchromatin_1d: 5
+    euchromatin_2d: 5
